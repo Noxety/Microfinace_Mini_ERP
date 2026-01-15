@@ -52,35 +52,9 @@ class User extends Authenticatable
 
     // Relationships
 
-    public function projects()
+    public function employee()
     {
-        return $this->hasMany(Project::class, 'created_by');
-    }
-
-    public function assignedProjects()
-    {
-        return $this->hasMany(Project::class, 'assigned_to');
-    }
-
-    public function tasks()
-    {
-        return $this->hasMany(Task::class, 'created_by');
-    }
-
-    public function assignedTasks()
-    {
-        return $this->hasMany(Task::class, 'assigned_to');
-    }
-
-    // Scopes
-    public function scopeLearners($query)
-    {
-        return $query->where('role', 'learner');
-    }
-
-    public function scopeTeachers($query)
-    {
-        return $query->where('role', 'teacher');
+        return $this->hasOne(Employee::class);
     }
 
     public function scopeAdmins($query)

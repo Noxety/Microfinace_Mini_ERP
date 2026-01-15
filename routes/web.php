@@ -12,6 +12,7 @@ use App\Http\Controllers\TaskController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\PermissionController;
+use App\Http\Controllers\DepartmentController;
 use App\Http\Middleware\AdminOnly;
 use App\Models\Category;
 use Illuminate\Support\Facades\Auth;
@@ -38,13 +39,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
             'userRole' => Auth::user()->role,
         ]);
     })->name('dashboard');
-
-    Route::resource('projects', ProjectController::class);
-    Route::resource('tasks', TaskController::class);
     Route::middleware([AdminOnly::class])->group(function () {
         Route::resource('users', UserController::class);
         Route::resource('roles', RoleController::class);
         Route::resource('permissions', PermissionController::class);
+        Route::resource('departments', DepartmentController::class);
         Route::get('admin/dashboard', function () {
             return Inertia::render('Admin/Dashboard');
         })->name('admin.dashboard');

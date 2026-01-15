@@ -2,14 +2,15 @@ import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
-import { type NavItem, type NavGroup } from '@/types';
+import { type NavGroup, type NavItem } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid, Users, GraduationCap, Briefcase, MessageSquare, Shield, Key } from 'lucide-react';
+import { Key, LayoutGrid, Shield, Users } from 'lucide-react';
 import AppLogo from './app-logo';
 
 export function AppSidebar() {
     const page = usePage();
     const user = page.props.auth.user;
+    console.log(user);
 
     const mainNavItems: NavItem[] = [
         {
@@ -17,13 +18,7 @@ export function AppSidebar() {
             href: '/dashboard',
             icon: LayoutGrid,
         },
-        {
-            title: 'Chat Room',
-            href: '/rooms/1',
-            icon: MessageSquare,
-          },
     ];
-
 
     // Add PMS navigation items
     // const pmsNavItems: NavItem[] = [
@@ -58,9 +53,7 @@ export function AppSidebar() {
         },
     ];
 
-    const footerNavItems: NavItem[] = [
-        
-    ];
+    const footerNavItems: NavItem[] = [];
 
     const navGroups: NavGroup[] = [];
 
@@ -71,7 +64,7 @@ export function AppSidebar() {
     // });
 
     // Only admins can access admin features
-    if (user.role === 'admin') {
+    if (user.roles?.includes('admin')) {
         navGroups.push({
             title: 'Administration',
             items: adminNavItems,

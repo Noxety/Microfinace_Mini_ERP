@@ -22,20 +22,12 @@ export default function Welcome() {
                             Dashboard
                         </Link>
                     ) : (
-                        <>
-                            <Link
-                                href={route('login')}
-                                className="inline-block rounded-sm border border-transparent px-5 py-1.5 text-sm leading-normal text-[#1b1b18] hover:border-[#19140035] dark:text-[#EDEDEC] dark:hover:border-[#3E3E3A] transition-colors"
-                            >
-                                Log in
-                            </Link>
-                            <Link
-                                href={route('register')}
-                                className="inline-block rounded-sm border border-[#19140035] px-5 py-1.5 text-sm leading-normal text-[#1b1b18] hover:border-[#1915014a] dark:border-[#3E3E3A] dark:text-[#EDEDEC] dark:hover:border-[#62605b] transition-colors bg-gradient-to-r from-[#f8f7f5] to-[#f5f4f2] dark:from-[#2a2a28] dark:to-[#252524]"
-                            >
-                                Register
-                            </Link>
-                        </>
+                        <Link
+                            href={route('login')}
+                            className="inline-block rounded-sm border border-transparent px-5 py-1.5 text-sm leading-normal text-[#1b1b18] hover:border-[#19140035] dark:text-[#EDEDEC] dark:hover:border-[#3E3E3A] transition-colors"
+                        >
+                            Log in
+                        </Link>
                     )}
                 </nav>
             </header>
@@ -55,16 +47,10 @@ export default function Welcome() {
                     {!auth.user && (
                         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
                             <Link
-                                href={route('register')}
+                                href={route('login')}
                                 className="inline-flex items-center px-8 py-4 text-lg font-medium text-white bg-gradient-to-r from-[#191400] to-[#4a4100] hover:from-[#191400]/90 hover:to-[#4a4100]/90 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
                             >
-                                Get Started Free
-                            </Link>
-                            <Link
-                                href={route('login')}
-                                className="inline-flex items-center px-8 py-4 text-lg font-medium text-[#1b1b18] border-2 border-[#19140035] hover:border-[#1915014a] rounded-xl hover:bg-[#f8f7f5] dark:text-[#EDEDEC] dark:border-[#3E3E3A] dark:hover:border-[#62605b] dark:hover:bg-[#2a2a28] transition-all duration-300"
-                            >
-                                View Demo
+                                Get Started
                             </Link>
                         </div>
                     )}
@@ -119,10 +105,10 @@ export default function Welcome() {
                             Join thousands of developers building with our platform today.
                         </p>
                         <Link
-                            href={route('register')}
+                            href={route('login')}
                             className="inline-flex items-center px-10 py-5 text-xl font-semibold text-white bg-gradient-to-r from-[#191400] to-[#4a4100] hover:from-[#191400]/90 hover:to-[#4a4100]/90 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1"
                         >
-                            Start Building Now
+                            Log In Now
                         </Link>
                     </div>
                 )}

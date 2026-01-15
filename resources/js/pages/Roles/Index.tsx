@@ -318,22 +318,7 @@ export default function RolesIndex({ roles, permissions }: Props) {
                                             ))}
                                         </div>
                                     </div>
-                                    <div className="flex justify-end gap-2">
-                                        <Button
-                                            type="button"
-                                            variant="outline"
-                                            onClick={() => {
-                                                setEditingRole(null);
-                                                setUpdateData({ name: '', permissions: [] });
-                                                setSelectedPermissions([]);
-                                            }}
-                                        >
-                                            Cancel
-                                        </Button>
-                                        <Button type="submit" disabled={updating}>
-                                            {updating ? 'Updating...' : 'Update Role'}
-                                        </Button>
-                                    </div>
+                               
                                     <div className="flex justify-end gap-2">
                                         <Button
                                             type="button"
