@@ -6,6 +6,7 @@ use App\Http\Controllers\Auth\SocialLoginController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\CourseController;
+use App\Http\Controllers\CurrencyController;
 use App\Http\Controllers\LessonController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\TaskController;
@@ -13,6 +14,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\DepartmentController;
+use App\Http\Controllers\LocationController;
 use App\Http\Middleware\AdminOnly;
 use App\Models\Category;
 use Illuminate\Support\Facades\Auth;
@@ -44,6 +46,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::resource('roles', RoleController::class);
         Route::resource('permissions', PermissionController::class);
         Route::resource('departments', DepartmentController::class);
+        Route::resource('locations', LocationController::class);
+        Route::resource('currencies', CurrencyController::class);
         Route::get('admin/dashboard', function () {
             return Inertia::render('Admin/Dashboard');
         })->name('admin.dashboard');

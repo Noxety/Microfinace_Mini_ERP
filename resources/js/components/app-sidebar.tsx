@@ -4,7 +4,7 @@ import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavGroup, type NavItem } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { Key, LayoutGrid, Shield, Users } from 'lucide-react';
+import { CableIcon, Coins, Key, LayoutGrid, LocateIcon, Shield, Users } from 'lucide-react';
 import AppLogo from './app-logo';
 
 export function AppSidebar() {
@@ -52,8 +52,26 @@ export function AppSidebar() {
             icon: Key,
         },
     ];
-
-    const footerNavItems: NavItem[] = [];
+    const masterNavItems: NavItem[] = [
+        {
+            title: 'Currency',
+            href: '/currencies',
+            icon: Coins,
+        },
+        {
+            title: 'Departments',
+            href: '/departments',
+            icon: CableIcon,
+        },
+        {
+            title: 'Locations',
+            href: '/locations',
+            icon: LocateIcon,
+        },
+    ];
+    const footerNavItems: NavItem[] = [
+        
+    ];
 
     const navGroups: NavGroup[] = [];
 
@@ -65,6 +83,10 @@ export function AppSidebar() {
 
     // Only admins can access admin features
     if (user.roles?.includes('admin')) {
+        navGroups.push({
+            title: 'Master Setup',
+            items: masterNavItems,
+        });
         navGroups.push({
             title: 'Administration',
             items: adminNavItems,
