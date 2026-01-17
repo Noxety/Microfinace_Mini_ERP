@@ -3,6 +3,7 @@
 use App\Http\Controllers\AssignmentController;
 use App\Http\Controllers\AssignmentSubmissionController;
 use App\Http\Controllers\Auth\SocialLoginController;
+use App\Http\Controllers\BranchController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\CourseController;
@@ -46,6 +47,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::resource('roles', RoleController::class);
         Route::resource('permissions', PermissionController::class);
         Route::resource('departments', DepartmentController::class);
+        Route::resource('branches', BranchController::class);
         Route::resource('locations', LocationController::class);
         Route::resource('currencies', CurrencyController::class);
         Route::get('admin/dashboard', function () {
