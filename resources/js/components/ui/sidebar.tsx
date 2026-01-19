@@ -239,7 +239,13 @@ function Sidebar({
       >
         <div
           data-sidebar="sidebar"
-          className="bg-sidebar group-data-[variant=floating]:border-sidebar-border flex h-full w-full flex-col group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:shadow-sm"
+          className="flex h-full w-full flex-col bg-white/10 dark:bg-black/20 backdrop-blur-xl
+    border border-white/20 dark:border-white/10
+    group-data-[variant=floating]:rounded-lg
+    group-data-[variant=floating]:shadow-[0_8px_32px_rgba(0,0,0,0.2)]
+    bg-gradient-to-b from-white/[0.12] to-transparent
+    transition-all duration-300
+  "
         >
           {children}
         </div>
