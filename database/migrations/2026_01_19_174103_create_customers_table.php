@@ -13,13 +13,13 @@ return new class extends Migration
     {
         Schema::create('customers', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('branch_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('created_by')->constrained('users');
-            $table->foreignId('credit_level_id')->nullable()->after('branch_id')->constrained();
-            $table->decimal('credit_limit', 12, 2)->default(0)->after('monthly_income');
-            $table->decimal('current_loan_balance', 12, 2)->default(0)->after('credit_limit');
-            $table->enum('risk_grade', ['A', 'B', 'C', 'D'])->default('C')->after('current_loan_balance');
-            $table->date('limit_expired_at')->nullable()->after('risk_grade');
+            $table->integer('branch_id')->nullable();
+            $table->integer('created_by')->nullable();
+            $table->integer('credit_level_id')->nullable();
+            $table->decimal('credit_limit', 12, 2)->default(0);
+            $table->decimal('current_loan_balance', 12, 2)->default(0);
+            $table->enum('risk_grade', ['A', 'B', 'C', 'D'])->default('C');
+            $table->date('limit_expired_at')->nullable();
             $table->string('customer_no')->unique();
             $table->string('name');
             $table->string('nrc')->nullable();

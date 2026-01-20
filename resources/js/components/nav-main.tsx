@@ -9,7 +9,6 @@ import { Collapsible, CollapsibleTrigger } from './ui/collapsible';
 export function NavMain({ items = [], groups = [] }: { items?: NavItem[]; groups?: NavGroup[] }) {
     const page = usePage();
     const { url } = usePage().props;
-    const [openGroup, setOpenGroup] = useState<string | null>(null);
     return (
         <>
             {items.length > 0 && (
@@ -38,7 +37,7 @@ export function NavMain({ items = [], groups = [] }: { items?: NavItem[]; groups
                         <Collapsible open={open} onOpenChange={setOpen}>
                             <CollapsibleTrigger asChild>
                                 <div
-                                    className={`border-e-sidebar-accent-foreground flex cursor-pointer items-center justify-between rounded-md border px-4 py-2 transition select-none`}
+                                    className={`border-e-sidebar-accent-foreground hover:border-b-sidebar-accent-foreground flex cursor-pointer items-center justify-between rounded-md border px-4 py-2 transition select-none`}
                                 >
                                     {group.icon && <group.icon className="h-4 w-4" />}
                                     <SidebarGroupLabel className="m-0 p-0">{group.title}</SidebarGroupLabel>
@@ -49,9 +48,9 @@ export function NavMain({ items = [], groups = [] }: { items?: NavItem[]; groups
                                 <SidebarMenu>
                                     {group.items.map((item) => (
                                         <SidebarMenuItem key={item.title} className="pt-1 pl-2">
-                                            <SidebarMenuButton asChild isActive={item.href == url} tooltip={{ children: item.title }}>
-                                                <Link href={item.href} prefetch>
-                                                    {item.icon && <item.icon className="mr-2 h-2 w-2" />}
+                                            <SidebarMenuButton asChild isActive={item.href == page.url} tooltip={{ children: item.title }}>
+                                                <Link href={item.href} prefetch className="mt-1">
+                                                    {item.icon && <item.icon className="h-2 w-2" />}
                                                     <span>{item.title}</span>
                                                 </Link>
                                             </SidebarMenuButton>

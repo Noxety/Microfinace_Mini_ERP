@@ -21,12 +21,12 @@ class DatabaseSeeder extends Seeder
             ['name' => 'admin', 'guard_name' => 'web'],
             ['name' => 'admin', 'guard_name' => 'web']
         );
-        
+
         $managerRole = Role::firstOrCreate(
             ['name' => 'manager', 'guard_name' => 'web'],
             ['name' => 'manager', 'guard_name' => 'web']
         );
-        
+
         $employeeRole = Role::firstOrCreate(
             ['name' => 'employee', 'guard_name' => 'web'],
             ['name' => 'employee', 'guard_name' => 'web']
@@ -58,6 +58,7 @@ class DatabaseSeeder extends Seeder
             'name' => 'Admin User',
             'email' => 'admin@gmail.com',
             'password' => Hash::make('password'),
+            'role' => 'admin',
         ]);
         $adminUser->assignRole($adminRole);
         $adminUser->employee()->create([

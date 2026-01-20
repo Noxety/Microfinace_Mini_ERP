@@ -4,7 +4,7 @@ import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavGroup, type NavItem } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { CableIcon, Coins, Key, LayoutGrid, LocateIcon, Settings, Shield, StoreIcon, Users } from 'lucide-react';
+import { CableIcon, Coins, Key, LayoutGrid, LocateIcon, Settings, Shield, StoreIcon, User2, UserCircle, Users } from 'lucide-react';
 import AppLogo from './app-logo';
 
 export function AppSidebar() {
@@ -52,6 +52,18 @@ export function AppSidebar() {
             icon: Key,
         },
     ];
+    const CustomerNavItem: NavItem[] = [
+        {
+            title: 'Credit Limits',
+            href: '/creditlevels',
+            icon: Coins,
+        },
+        {
+            title: 'Customers',
+            href: '/customers',
+            icon: UserCircle,
+        },
+    ];
     const masterNavItems: NavItem[] = [
         {
             title: 'Currency',
@@ -90,6 +102,11 @@ export function AppSidebar() {
             title: 'Master Setup',
             items: masterNavItems,
             icon: Settings,
+        });
+        navGroups.push({
+            title: 'Customers Setup',
+            items: CustomerNavItem,
+            icon: User2,
         });
         navGroups.push({
             title: 'Administration',

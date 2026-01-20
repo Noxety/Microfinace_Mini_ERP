@@ -7,7 +7,9 @@ use App\Http\Controllers\BranchController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\CourseController;
+use App\Http\Controllers\CreditLevelController;
 use App\Http\Controllers\CurrencyController;
+use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\LessonController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\TaskController;
@@ -48,8 +50,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::resource('permissions', PermissionController::class);
         Route::resource('departments', DepartmentController::class);
         Route::resource('branches', BranchController::class);
+        Route::resource('creditlevels', CreditLevelController::class);
         Route::resource('locations', LocationController::class);
         Route::resource('currencies', CurrencyController::class);
+        Route::resource('customers', CustomerController::class);
+
         Route::get('admin/dashboard', function () {
             return Inertia::render('Admin/Dashboard');
         })->name('admin.dashboard');
