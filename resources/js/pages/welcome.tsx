@@ -11,7 +11,7 @@ export default function Welcome() {
                 <link rel="preconnect" href="https://fonts.bunny.net" />
                 <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
             </Head>
-            <div className="pointer-events-none fixed ">
+            {/* <div className="pointer-events-none fixed ">
                 <FloatingLines
                     linesGradient={['#E945F5', '#2F4BC0', '#E945F5']}
                     animationSpeed={1}
@@ -22,7 +22,7 @@ export default function Welcome() {
                     parallax
                     parallaxStrength={0.2}
                 />
-            </div>
+            </div> */}
             {/* Navigation */}
             <header className="mx-auto mb-8 w-full max-w-[335px] px-4 text-sm not-has-[nav]:hidden lg:max-w-7xl lg:px-8">
                 <nav className="flex items-center justify-end gap-4 py-6">

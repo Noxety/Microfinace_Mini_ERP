@@ -17,7 +17,8 @@ return new class extends Migration
             $table->enum('type', ['current', 'permanent', 'workplace']);
             $table->string('address_line');
             $table->string('township')->nullable();
-            $table->string('city')->nullable();
+            $table->string('region')->nullable();
+            $table->string('district')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

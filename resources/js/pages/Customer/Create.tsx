@@ -1,4 +1,6 @@
+import AddressForm from '@/components/AddressForm';
 import InputError from '@/components/input-error';
+import NRCForm from '@/components/NRCForm';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -9,7 +11,7 @@ import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, router, useForm } from '@inertiajs/react';
 import { LoaderCircle } from 'lucide-react';
-import { FormEventHandler } from 'react';
+import { FormEventHandler, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
 interface Role {
@@ -23,12 +25,12 @@ interface Department {
 }
 
 interface Props {
-    roles: Role[];
-    departments: Department[];
+    branches: any;
+    creditlevel: any;
 }
 
-export default function CustomersCreate({ roles, departments }: Props) {
-    console.log(departments);
+export default function CustomersCreate({ branches, creditlevel }: Props) {
+    console.log(creditlevel);
 
     const breadcrumbs: BreadcrumbItem[] = [
         {
@@ -40,23 +42,21 @@ export default function CustomersCreate({ roles, departments }: Props) {
             href: '/customers/create',
         },
     ];
-
+    const [gender, setGender] = useState(['Male', 'Female', 'Other']);
     const { data, setData, post, processing, errors, reset } = useForm({
         name: '',
         email: '',
-        password: '',
-        password_confirmation: '',
-        role_id: '',
-        bio: '',
-        // Employee fields
-        employee_id: '',
+        nrc: '',
+        gender: '',
+        remark: '',
+        occupation: '',
         phone: '',
         address: '',
         date_of_birth: '',
-        hire_date: '',
-        position: '',
-        department_id: '',
-        salary: '',
+        monthly_income: '',
+        creditlevel: '',
+        branch: '',
+        limit_expired_at: '',
     });
 
     const submit: FormEventHandler = (e) => {
@@ -64,21 +64,43 @@ export default function CustomersCreate({ roles, departments }: Props) {
         post(route('customers.store'), {
             preserveScroll: true,
             onSuccess: () => {
-                toast.success('User created successfully with employee information.', {
+                toast.success('Customer created successfully.', {
                     position: 'top-center',
                     duration: 3000,
                 });
                 reset();
             },
             onError: () => {
-                toast.error('Error creating user. Please check the form.', {
+                toast.error('Error creating Customer. Please check the form.', {
                     position: 'top-center',
                     duration: 3000,
                 });
             },
         });
     };
+    const [NRCCodeSelect, setNRCCodeSelect] = useState<any>();
+    const [NRCPlaceSelect, setNRCPlaceSelect] = useState<any>();
+    const [NRCTypeSelect, setNRCTypeSelect] = useState<any>();
+    const [NRCCode, setNRCCode] = useState<any>();
+    const [region, setRegion] = useState('');
+    const [district, setDistrict] = useState('');
+    const [township, setTownship] = useState('');
+    useEffect(() => {
+        // Extract values from existedNRC if present
+        if (data.nrc) {
+            const match = data.nrc.match(/^(\d+)\/(\w+)\((\w+)\)(\d+)$/);
+            if (match) {
+                if (NRCCodeSelect !== match[1]) setNRCCodeSelect(match[1]);
+                if (NRCPlaceSelect !== match[2]) setNRCPlaceSelect(match[2]);
+                if (NRCTypeSelect !== match[3]) setNRCTypeSelect(match[3]);
+                if (NRCCode !== match[4]) setNRCCode(match[4]);
+            }
+        }
+    }, [data.nrc]);
 
+    const handleNRCFormUpdate = (nrcData: any) => {
+        setData('nrc', nrcData);
+    };
     return (
         <>
             <AppLayout breadcrumbs={breadcrumbs}>
@@ -96,7 +118,7 @@ export default function CustomersCreate({ roles, departments }: Props) {
                             </CardHeader>
                             <CardContent className="space-y-4">
                                 <div className="grid gap-2">
-                                    <Label htmlFor="name">Name *</Label>
+                                    <Label htmlFor="name">Name </Label>
                                     <Input
                                         id="name"
                                         type="text"
@@ -108,13 +130,11 @@ export default function CustomersCreate({ roles, departments }: Props) {
                                     />
                                     <InputError message={errors.name} className="mt-1" />
                                 </div>
-
                                 <div className="grid gap-2">
-                                    <Label htmlFor="email">Email *</Label>
+                                    <Label htmlFor="email">Email </Label>
                                     <Input
                                         id="email"
                                         type="email"
-                                        required
                                         value={data.email}
                                         onChange={(e) => setData('email', e.target.value)}
                                         disabled={processing}
@@ -122,91 +142,24 @@ export default function CustomersCreate({ roles, departments }: Props) {
                                     />
                                     <InputError message={errors.email} className="mt-1" />
                                 </div>
-
                                 <div className="grid gap-2">
-                                    <Label htmlFor="password">Password *</Label>
-                                    <Input
-                                        id="password"
-                                        type="password"
-                                        required
-                                        value={data.password}
-                                        onChange={(e) => setData('password', e.target.value)}
-                                        disabled={processing}
-                                        placeholder="Password (min 8 characters)"
+                                    <Label htmlFor="nrcNumber" className="text-sm font-bold">
+                                        NRC
+                                    </Label>
+                                    <NRCForm
+                                        NRCCodeSelect={NRCCodeSelect}
+                                        setNRCCodeSelect={setNRCCodeSelect}
+                                        NRCPlaceSelect={NRCPlaceSelect}
+                                        setNRCPlaceSelect={setNRCPlaceSelect}
+                                        NRCTypeSelect={NRCTypeSelect}
+                                        setNRCTypeSelect={setNRCTypeSelect}
+                                        NRCCode={NRCCode}
+                                        setNRCCode={setNRCCode}
+                                        language={'en'}
+                                        onUpdate={handleNRCFormUpdate}
                                     />
-                                    <InputError message={errors.password} className="mt-1" />
+                                    <InputError message={errors.nrc} />
                                 </div>
-
-                                <div className="grid gap-2">
-                                    <Label htmlFor="password_confirmation">Confirm Password *</Label>
-                                    <Input
-                                        id="password_confirmation"
-                                        type="password"
-                                        required
-                                        value={data.password_confirmation}
-                                        onChange={(e) => setData('password_confirmation', e.target.value)}
-                                        disabled={processing}
-                                        placeholder="Confirm password"
-                                    />
-                                    <InputError message={errors.password_confirmation} className="mt-1" />
-                                </div>
-
-                                <div className="grid gap-2">
-                                    <Label htmlFor="role_id">Role *</Label>
-                                    <Select
-                                        value={data.role_id ? String(data.role_id) : undefined}
-                                        onValueChange={(value) => setData('role_id', value)}
-                                        disabled={processing}
-                                    >
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Select a role" />
-                                        </SelectTrigger>
-
-                                        <SelectContent>
-                                            {roles.map((role) => (
-                                                <SelectItem key={role.id} value={String(role.id)}>
-                                                    {role.name}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-
-                                    <InputError message={errors.role_id} className="mt-1" />
-                                </div>
-
-                                <div className="grid gap-2">
-                                    <Label htmlFor="bio">Bio</Label>
-                                    <Textarea
-                                        id="bio"
-                                        value={data.bio}
-                                        onChange={(e) => setData('bio', e.target.value)}
-                                        disabled={processing}
-                                        placeholder="User bio"
-                                        rows={3}
-                                    />
-                                    <InputError message={errors.bio} className="mt-1" />
-                                </div>
-                            </CardContent>
-                        </Card>
-
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Employee Information</CardTitle>
-                            </CardHeader>
-                            <CardContent className="space-y-4">
-                                <div className="grid gap-2">
-                                    <Label htmlFor="employee_id">Employee ID</Label>
-                                    <Input
-                                        id="employee_id"
-                                        type="text"
-                                        value={data.employee_id}
-                                        onChange={(e) => setData('employee_id', e.target.value)}
-                                        disabled={processing}
-                                        placeholder="Employee ID (optional)"
-                                    />
-                                    <InputError message={errors.employee_id} className="mt-1" />
-                                </div>
-
                                 <div className="grid gap-2">
                                     <Label htmlFor="phone">Phone</Label>
                                     <Input
@@ -219,108 +172,171 @@ export default function CustomersCreate({ roles, departments }: Props) {
                                     />
                                     <InputError message={errors.phone} className="mt-1" />
                                 </div>
-
                                 <div className="grid gap-2">
-                                    <Label htmlFor="address">Address</Label>
-                                    <Textarea
-                                        id="address"
-                                        value={data.address}
-                                        onChange={(e) => setData('address', e.target.value)}
-                                        disabled={processing}
-                                        placeholder="Address"
-                                        rows={2}
-                                    />
-                                    <InputError message={errors.address} className="mt-1" />
-                                </div>
-
-                                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                                    <div className="grid gap-2">
-                                        <Label htmlFor="date_of_birth">Date of Birth</Label>
-                                        <Input
-                                            id="date_of_birth"
-                                            type="date"
-                                            value={data.date_of_birth}
-                                            onChange={(e) => setData('date_of_birth', e.target.value)}
-                                            disabled={processing}
-                                        />
-                                        <InputError message={errors.date_of_birth} className="mt-1" />
-                                    </div>
-
-                                    <div className="grid gap-2">
-                                        <Label htmlFor="hire_date">Hire Date</Label>
-                                        <Input
-                                            id="hire_date"
-                                            type="date"
-                                            value={data.hire_date}
-                                            onChange={(e) => setData('hire_date', e.target.value)}
-                                            disabled={processing}
-                                        />
-                                        <InputError message={errors.hire_date} className="mt-1" />
-                                    </div>
-                                </div>
-
-                                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                                    <div className="grid gap-2">
-                                        <Label htmlFor="position">Position</Label>
-                                        <Input
-                                            id="position"
-                                            type="text"
-                                            value={data.position}
-                                            onChange={(e) => setData('position', e.target.value)}
-                                            disabled={processing}
-                                            placeholder="Job position"
-                                        />
-                                        <InputError message={errors.position} className="mt-1" />
-                                    </div>
-
-                                    <div className="grid gap-2">
-                                        <Label htmlFor="department_id">Department</Label>
-                                        <Select
-                                            value={data.department_id ? String(data.department_id) : undefined}
-                                            onValueChange={(value) => setData('department_id', value)}
-                                            disabled={processing}
-                                        >
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Select a department" />
-                                            </SelectTrigger>
-
-                                            <SelectContent>
-                                                {departments.map((department) => (
-                                                    <SelectItem key={department.id} value={String(department.id)}>
-                                                        {department.name}
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-
-                                        <InputError message={errors.department_id} className="mt-1" />
-                                    </div>
-                                </div>
-
-                                <div className="grid gap-2">
-                                    <Label htmlFor="salary">Salary</Label>
+                                    <Label htmlFor="date_of_birth">Date of Birth</Label>
                                     <Input
-                                        id="salary"
-                                        type="number"
-                                        step="0.01"
-                                        min="0"
-                                        value={data.salary}
-                                        onChange={(e) => setData('salary', e.target.value)}
+                                        id="date_of_birth"
+                                        type="date"
+                                        value={data.date_of_birth}
+                                        onChange={(e) => setData('date_of_birth', e.target.value)}
                                         disabled={processing}
-                                        placeholder="Salary amount"
                                     />
-                                    <InputError message={errors.salary} className="mt-1" />
+                                    <InputError message={errors.date_of_birth} className="mt-1" />
+                                </div>
+                                <div className="grid gap-2">
+                                    <Label htmlFor="gender">Gender </Label>
+                                    <Select
+                                        value={data.gender ? String(data.gender) : undefined}
+                                        onValueChange={(value) => setData('gender', value)}
+                                        disabled={processing}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select a role" />
+                                        </SelectTrigger>
+
+                                        <SelectContent>
+                                            {gender.map((role) => (
+                                                <SelectItem key={role} value={String(role).toLowerCase()}>
+                                                    {role}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+
+                                    <InputError message={errors.gender} className="mt-1" />
+                                </div>
+                                <div className="grid gap-2">
+                                    <Label htmlFor="occupation">Occupation </Label>
+                                    <Input
+                                        id="occupation"
+                                        type="text"
+                                        required
+                                        value={data.occupation}
+                                        onChange={(e) => setData('occupation', e.target.value)}
+                                        disabled={processing}
+                                        placeholder="Occupation ( Job )"
+                                    />
+                                    <InputError message={errors.occupation} className="mt-1" />
+                                </div>
+                                <div className="grid gap-2">
+                                    <Label htmlFor="monthly_income">Income (Monthly)</Label>
+
+                                    <div className="relative">
+                                        <Input
+                                            id="monthly_income"
+                                            type="text"
+                                            inputMode="numeric"
+                                            pattern="[0-9]*"
+                                            required
+                                            value={data.monthly_income}
+                                            disabled={processing}
+                                            placeholder="XXXXX"
+                                            onChange={(e) => {
+                                                const value = e.target.value.replace(/\D/g, '');
+                                                setData('monthly_income', value);
+                                            }}
+                                            className="pr-14"
+                                        />
+                                        <span className="text-muted-foreground pointer-events-none absolute inset-y-0 right-3 flex items-center text-sm">
+                                            MMK
+                                        </span>
+                                    </div>
+
+                                    <InputError message={errors.monthly_income} className="mt-1" />
+                                </div>
+                                <div className="grid gap-2">
+                                    <Label htmlFor="branch">Branch</Label>
+
+                                    <Select
+                                        value={data.branch ? String(data.branch) : undefined}
+                                        onValueChange={(value) => setData('branch', Number(value))}
+                                        disabled={processing}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select branch" />
+                                        </SelectTrigger>
+
+                                        <SelectContent>
+                                            {branches.map((branch) => (
+                                                <SelectItem key={branch.id} value={String(branch.id)}>
+                                                    {branch.name} ({branch.location?.name})
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+
+                                    <InputError message={errors.branch} className="mt-1" />
+                                </div>
+                                <div className="grid gap-2">
+                                    <Label htmlFor="creditlevel">Credit Level</Label>
+
+                                    <Select
+                                        value={data.creditlevel ? String(data.creditlevel) : undefined}
+                                        onValueChange={(value) => setData('creditlevel', Number(value))}
+                                        disabled={processing}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select Level" />
+                                        </SelectTrigger>
+
+                                        <SelectContent>
+                                            {creditlevel.map((creditlevel) => (
+                                                <SelectItem key={creditlevel.id} value={String(creditlevel.id)}>
+                                                    {creditlevel.name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+
+                                    <InputError message={errors.creditlevel} className="mt-1" />
+                                </div>
+                                <div className="grid gap-2">
+                                    <Label htmlFor="limit_expired_at">Limit Expire Date</Label>
+                                    <Input
+                                        id="limit_expired_at"
+                                        type="date"
+                                        value={data.limit_expired_at}
+                                        onChange={(e) => setData('limit_expired_at', e.target.value)}
+                                        disabled={processing}
+                                    />
+                                    <InputError message={errors.limit_expired_at} className="mt-1" />
+                                </div>
+                                <div className="grid gap-2">
+                                    <Label htmlFor="remark">Remark</Label>
+                                    <Textarea
+                                        id="remark"
+                                        value={data.remark}
+                                        onChange={(e) => setData('remark', e.target.value)}
+                                        disabled={processing}
+                                        rows={3}
+                                    />
+                                    <InputError message={errors.remark} className="mt-1" />
+                                </div>
+                                <div className="grid gap-2">
+                                    <Label htmlFor="address" className="text-sm font-bold">
+                                        Address
+                                    </Label>
+                                    <AddressForm
+                                        region={region}
+                                        setRegion={setRegion}
+                                        district={district}
+                                        setDistrict={setDistrict}
+                                        township={township}
+                                        setTownship={setTownship}
+                                        onUpdate={(address) => setData('address', address)}
+                                    />
+                                    <InputError message={errors.address} />
                                 </div>
                             </CardContent>
                         </Card>
 
                         <div className="flex justify-end gap-4">
-                            <Button type="button" variant="outline" onClick={() => router.visit(route('users.index'))} disabled={processing}>
+                            <Button type="button" variant="outline" onClick={() => router.visit(route('customers.index'))} disabled={processing}>
                                 Cancel
                             </Button>
                             <Button type="submit" disabled={processing}>
                                 {processing && <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />}
-                                Create User
+                                Create Customer
                             </Button>
                         </div>
                     </form>

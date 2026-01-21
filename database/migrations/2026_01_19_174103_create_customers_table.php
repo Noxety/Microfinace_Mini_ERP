@@ -24,6 +24,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('nrc')->nullable();
             $table->string('phone')->nullable();
+            $table->string('email')->nullable();
             $table->date('dob')->nullable();
             $table->enum('gender', ['male', 'female', 'other'])->nullable();
             $table->string('occupation')->nullable();

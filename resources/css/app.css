@@ -58,7 +58,19 @@
     --color-sidebar-border: var(--sidebar-border);
     --color-sidebar-ring: var(--sidebar-ring);
 }
+::-webkit-scrollbar {
+  display: none;
+}
 
+/* Firefox */
+html {
+  scrollbar-width: none;
+}
+
+/* Internet Explorer / old Edge */
+body {
+  -ms-overflow-style: none;
+}
 /*
   The default border color has changed to `currentColor` in Tailwind CSS v4,
   so we've added these compatibility styles to make sure everything still

@@ -13,7 +13,13 @@ class CustomerAddress extends Model
         'customer_id',
         'type',
         'address_line',
+        'region',
+        'district',
         'township',
-        'city',
     ];
+
+    public function customer()
+    {
+        return $this->belongsTo(Customer::class);
+    }
 }
