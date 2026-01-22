@@ -1,15 +1,13 @@
 import { Pagination } from '@/components/pagination';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Switch } from '@/components/ui/switch';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { usePermission } from '@/hooks/usePermission';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
 import { Eye, Pencil, Plus } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { toast } from 'sonner';
 import OfflinePage from '../OfflinePage';
 
 interface Role {
@@ -84,7 +82,6 @@ export default function UsersIndex({ customers, userRole }: Props) {
                                         <TableHead>NRC</TableHead>
                                         <TableHead>Phone</TableHead>
                                         <TableHead>Branch</TableHead>
-                                        <TableHead>Status</TableHead>
                                         <TableHead className="text-right">Actions</TableHead>
                                     </TableRow>
                                 </TableHeader>
@@ -98,36 +95,6 @@ export default function UsersIndex({ customers, userRole }: Props) {
                                             <TableCell>{customer.nrc ?? '-'}</TableCell>
                                             <TableCell>{customer.phone ?? '-'}</TableCell>
                                             <TableCell>{customer.branch?.name ?? '-'}</TableCell>
-
-                                            {/* Status */}
-                                            <TableCell>
-                                                {hasPermission('update_customers') && (
-                                                    <Switch
-                                                        checked={customer.status === 'active'}
-                                                        onCheckedChange={(checked) => {
-                                                            router.put(
-                                                                route('customers.update-status', customer.id),
-                                                                { status: checked ? 'active' : 'pending' },
-                                                                {
-                                                                    preserveScroll: true,
-                                                                    onSuccess: () =>
-                                                                        toast.success(`Customer ${checked ? 'activated' : 'set to pending'}`, {
-                                                                            position: 'top-center',
-                                                                            duration: 3000,
-                                                                        }),
-                                                                    onError: () =>
-                                                                        toast.error('Failed to update status', {
-                                                                            position: 'top-center',
-                                                                            duration: 3000,
-                                                                        }),
-                                                                },
-                                                            );
-                                                        }}
-                                                    />
-                                                )}
-                                            </TableCell>
-
-                                            {/* Actions */}
                                             <TableCell className="text-right">
                                                 <div className="flex justify-end gap-2">
                                                     {hasPermission('view_customers') && (

@@ -30,8 +30,6 @@ interface Props {
 }
 
 export default function CustomersCreate({ branches, creditlevel }: Props) {
-    console.log(creditlevel);
-
     const breadcrumbs: BreadcrumbItem[] = [
         {
             title: 'Customers',

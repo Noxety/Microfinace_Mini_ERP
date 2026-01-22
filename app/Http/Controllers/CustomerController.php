@@ -21,7 +21,7 @@ class CustomerController extends Controller
      */
     public function index()
     {
-        $customers = Customer::with(['addresses'])->latest()->paginate(10);
+        $customers = Customer::with(['addresses', 'branch', 'creditLevel'])->latest()->paginate(10);
 
         return Inertia::render('Customer/Index', [
             'customers' => $customers,
@@ -65,13 +65,20 @@ class CustomerController extends Controller
             }
 
             $initials = $lastInitial ? $firstInitial . $lastInitial : $firstInitial;
+            $nrc = $request->nrc;
+            $lastSixNrc = substr(preg_replace('/\D/', '', $nrc), -6);
+            preg_match('/\/([A-Za-z]+)\(/', $nrc, $matches);
+            $middleRaw = $matches[1] ?? '';
 
-            $lastSixNrc = substr(preg_replace('/\D/', '', $request->nrc), -6);
+            $middleNrc = implode('', array_map(
+                fn($m) => strtoupper($m[0]),
+                preg_split('/(?=[A-Z])/', $middleRaw, -1, PREG_SPLIT_NO_EMPTY)
+            ));
             $customer = Customer::create([
                 'branch_id' => $request->branch,
                 'credit_level_id' => $request->creditlevel,
                 'limit_expired_at' => $request->limit_expired_at,
-                'customer_no' => $initials  . '-' . $lastSixNrc,
+                'customer_no' => $initials  . '-' . $middleNrc . $lastSixNrc,
                 'name' => $request->name,
                 'nrc' => $request->nrc,
                 'phone' => $request->phone,
@@ -81,6 +88,7 @@ class CustomerController extends Controller
                 'occupation' => $request->occupation,
                 'monthly_income' => $request->monthly_income,
                 'remark' => $request->remark,
+                'status' => "active",
                 'created_by' => auth()->id(),
             ]);
             if ($request->address) {
@@ -96,7 +104,6 @@ class CustomerController extends Controller
                 ]);
             }
         });
-
         return redirect()
             ->route('customers.index')
             ->with('success', 'Customer created successfully');
@@ -107,20 +114,27 @@ class CustomerController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $customer = Customer::with([
+            'branch.location',
+            'creditLevel',
+            'addresses' => fn($q) => $q->latest()->limit(1),
+        ])->findOrFail($id);
+
+        return Inertia::render('Customer/Show', [
+            'customer' => $customer,
+        ]);
     }
+
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Customer $user)
+    public function edit(Customer $customer)
     {
-        $user->load(['addresses']);
-
         return Inertia::render('Customer/Edit', [
-            'user' => $user,
-            'roles' => Role::all(),
-            'departments' => Department::all(),
+            'customer' => $customer->load(['branch', 'creditLevel', 'addresses' => fn($q) => $q->latest()->limit(1),]),
+            'branches' => Branch::with('location')->get(),
+            'creditlevel' => CreditLevel::all(),
         ]);
     }
 
@@ -129,8 +143,47 @@ class CustomerController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        DB::transaction(function () use ($request, $id) {
+
+            $customer = Customer::findOrFail($id);
+            $customer->update([
+                'branch_id' => $request->branch,
+                'credit_level_id' => $request->creditlevel,
+                'limit_expired_at' => $request->limit_expired_at,
+                'name' => $request->name,
+                'nrc' => $request->nrc,
+                'phone' => $request->phone,
+                'email' => $request->email,
+                'dob' => $request->date_of_birth,
+                'gender' => $request->gender,
+                'occupation' => $request->occupation,
+                'monthly_income' => $request->monthly_income,
+                'remark' => $request->remark,
+                'updated_by' => auth()->id(),
+            ]);
+            if ($request->address) {
+                $parts = array_map('trim', explode(',', $request->address));
+
+                CustomerAddress::updateOrCreate(
+                    [
+                        'customer_id' => $customer->id,
+                        'type' => 'current',
+                    ],
+                    [
+                        'address_line' => $request->address,
+                        'township' => $parts[0] ?? null,
+                        'district' => $parts[1] ?? null,
+                        'region' => $parts[2] ?? null,
+                    ]
+                );
+            }
+        });
+
+        return redirect()
+            ->route('customers.index')
+            ->with('success', 'Customer updated successfully');
     }
+
 
     /**
      * Remove the specified resource from storage.
