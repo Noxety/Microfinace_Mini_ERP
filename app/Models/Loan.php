@@ -37,4 +37,12 @@ class Loan extends Model
     {
         return $this->belongsTo(Customer::class);
     }
+    public function branch()
+    {
+        return $this->belongsTo(Branch::class);
+    }
+    public function creator()
+    {
+        return $this->belongsTo(User::class , 'created_by');
+    }
 }

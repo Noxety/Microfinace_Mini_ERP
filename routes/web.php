@@ -17,6 +17,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\DepartmentController;
+use App\Http\Controllers\LoanController;
 use App\Http\Controllers\LocationController;
 use App\Http\Middleware\AdminOnly;
 use App\Models\Category;
@@ -45,12 +46,19 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ]);
     })->name('dashboard');
     Route::middleware([AdminOnly::class])->group(function () {
+
+        Route::post('loans/approve', [LoanController::class, 'approve'])->name('loans.approve');
+        Route::post('loans/disburse', [LoanController::class, 'disburse'])->name('loans.disburse');
+        Route::post('loans/preview', [LoanController::class, 'preview'])->name('loans.preview');
+        Route::get('loans/{loan}/approve', [LoanController::class, 'approve'])->name('loans.approve');
         Route::resource('users', UserController::class);
         Route::resource('roles', RoleController::class);
         Route::resource('permissions', PermissionController::class);
         Route::resource('departments', DepartmentController::class);
         Route::resource('branches', BranchController::class);
         Route::resource('creditlevels', CreditLevelController::class);
+        Route::resource('loans', LoanController::class);
+
         Route::resource('locations', LocationController::class);
         Route::resource('currencies', CurrencyController::class);
         Route::resource('customers', CustomerController::class);
