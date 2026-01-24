@@ -117,4 +117,24 @@ class LoanController extends Controller
             'loan' => $loan,
         ]);
     }
+    public function approve(Request $request, Loan $loan)
+    {
+        if ($loan->status !== 'pending') {
+            throw ValidationException::withMessages([
+                'loan' => 'Only pending loans can be approved.',
+            ]);
+        }
+
+        DB::transaction(function () use ($loan) {
+            $loan->update([
+                'status' => 'approved',
+                'approved_by' => auth()->id(),
+                'approved_at' => now(),
+            ]);
+        });
+
+        return redirect()
+            ->route('loans.show', $loan)
+            ->with('success', 'Loan approved successfully');
+    }
 }
