@@ -19,7 +19,7 @@ return new class extends Migration
                 ->constrained()
                 ->nullOnDelete();
 
-            $table->enum('penalty_type', [
+            $table->enum('rate_type', [
                 'flat',          // fixed amount
                 'percentage',    // % of installment
                 'daily_interest' // % per overdue day

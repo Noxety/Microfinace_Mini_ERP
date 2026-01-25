@@ -29,6 +29,8 @@ return new class extends Migration
                 'partial',
                 'overdue'
             ])->default('pending');
+            $table->decimal('penalty_amount', 12, 2)->default(0);
+            $table->integer('overdue_days')->default(0);
             $table->timestamps();
             $table->softDeletes();
         });

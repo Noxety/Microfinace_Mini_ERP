@@ -43,7 +43,8 @@ return new class extends Migration
                 'active',
                 'completed',
                 'overdue',
-                'cancelled'
+                'cancelled',
+                'disbursed',
             ])->default('pending');
             $table->foreignId('created_by')
                 ->constrained('users');

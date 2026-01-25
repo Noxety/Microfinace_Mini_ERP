@@ -3,7 +3,9 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
-import { router } from '@inertiajs/react';
+import { Head, router } from '@inertiajs/react';
+import DisburseLoanDialog from './components/DisburseLoanDialog';
+import PayInstallmentDialog from './components/PayInstallmentDialog';
 
 export default function LoanShow({ loan }) {
     const statusColor =
@@ -27,6 +29,7 @@ export default function LoanShow({ loan }) {
     ];
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
+            <Head title="Loans Detail" />
             <div className="space-y-6">
                 {/* Loan Summary */}
                 <Card>
@@ -76,7 +79,8 @@ export default function LoanShow({ loan }) {
                         <Button onClick={() => router.get(route('loans.approve', loan.id))}>Approve Loan</Button>
                     </div>
                 )}
-
+                {loan.status === 'approved' && <DisburseLoanDialog loan={loan} />}
+                {loan.status === 'disbursed' && <span className="text-muted-foreground text-sm">Disbursed on {loan.disbursed_at}</span>}
                 {/* Repayment Schedule */}
                 <Card>
                     <CardHeader>
@@ -88,24 +92,29 @@ export default function LoanShow({ loan }) {
                                 <TableRow>
                                     <TableHead>#</TableHead>
                                     <TableHead>Due Date</TableHead>
-                                    <TableHead>Principal</TableHead>
-                                    <TableHead>Interest</TableHead>
                                     <TableHead>Total</TableHead>
                                     <TableHead>Paid</TableHead>
                                     <TableHead>Status</TableHead>
+                                    <TableHead></TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {loan.schedules.map((row) => (
-                                    <TableRow key={row.id}>
-                                        <TableCell>{row.installment_no}</TableCell>
-                                        <TableCell>{row.due_date}</TableCell>
-                                        <TableCell>{row.principal_due}</TableCell>
-                                        <TableCell>{row.interest_due}</TableCell>
-                                        <TableCell>{row.total_due}</TableCell>
-                                        <TableCell>{row.paid_amount}</TableCell>
+                                {loan.schedules.map((s: any) => (
+                                    <TableRow key={s.id}>
+                                        <TableCell>{s.installment_no}</TableCell>
+                                        <TableCell>{s.due_date}</TableCell>
+                                        <TableCell>{s.total_due.toLocaleString()}</TableCell>
+                                        <TableCell>{s.paid_amount.toLocaleString()}</TableCell>
                                         <TableCell>
-                                            <Badge variant={row.status === 'paid' ? 'success' : 'secondary'}>{row.status}</Badge>
+                                            <Badge variant={s.status === 'paid' ? 'success' : s.status === 'overdue' ? 'destructive' : 'secondary'}>
+                                                {s.status} {s.overdue_days > 0 && <Badge variant="destructive">{s.overdue_days} days overdue</Badge>}{' '}
+                                                {s.penalty_amount > 0 && (
+                                                    <p className="text-xs text-red-600">Penalty: {s.penalty_amount.toLocaleString()} MMK</p>
+                                                )}
+                                            </Badge>
+                                        </TableCell>
+                                        <TableCell>
+                                            {loan.status === 'disbursed' && s.status !== 'paid' && <PayInstallmentDialog schedule={s} />}
                                         </TableCell>
                                     </TableRow>
                                 ))}

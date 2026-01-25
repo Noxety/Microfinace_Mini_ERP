@@ -22,6 +22,8 @@ class Loan extends Model
         'start_date',
         'end_date',
         'disbursed_at',
+        'disbursed_by',
+        'disbursed_amount',
         'status',
         'created_by',
         'approved_by',
@@ -32,7 +34,10 @@ class Loan extends Model
     {
         return $this->hasMany(LoanSchedule::class);
     }
-
+    public function disburser()
+    {
+        return $this->belongsTo(User::class, 'disbursed_by');
+    }
     public function customer()
     {
         return $this->belongsTo(Customer::class);
@@ -43,6 +48,6 @@ class Loan extends Model
     }
     public function creator()
     {
-        return $this->belongsTo(User::class , 'created_by');
+        return $this->belongsTo(User::class, 'created_by');
     }
 }

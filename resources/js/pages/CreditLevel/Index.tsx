@@ -180,7 +180,7 @@ export default function CreditLevelsIndex({ creditlevel }: Props) {
                                 </DialogHeader>
                                 <form onSubmit={handleCreate} className="space-y-4">
                                     <div className="space-y-2">
-                                        <Label htmlFor="name">Department Name *</Label>
+                                        <Label htmlFor="name">Level Name *</Label>
                                         <Input
                                             id="name"
                                             value={createData.name}

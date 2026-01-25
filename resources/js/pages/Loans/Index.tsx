@@ -49,64 +49,65 @@ export default function LoanIndex({ loans }: { loans: { data: Loan[] } }) {
         <>
             <AppLayout breadcrumbs={breadcrumbs}>
                 <Head title="Loans" />
+                <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
+                    <div className="mb-6 flex items-center justify-between">
+                        <h1 className="text-2xl font-semibold">Loans</h1>
+                        <Button asChild>
+                            <Link href={route('loans.create')}>Create Loan</Link>
+                        </Button>
+                    </div>
 
-                <div className="mb-6 flex items-center justify-between p-4">
-                    <h1 className="text-2xl font-semibold">Loans</h1>
-                    <Button asChild>
-                        <Link href={route('loans.create')}>Create Loan</Link>
-                    </Button>
-                </div>
-
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Loan List</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>Loan No</TableHead>
-                                    <TableHead>Customer</TableHead>
-                                    <TableHead>Branch</TableHead>
-                                    <TableHead>Principal</TableHead>
-                                    <TableHead>Term</TableHead>
-                                    <TableHead>Interest</TableHead>
-                                    <TableHead>Status</TableHead>
-                                    <TableHead>Created</TableHead>
-                                    <TableHead className="text-right">Actions</TableHead>
-                                </TableRow>
-                            </TableHeader>
-
-                            <TableBody>
-                                {loans.data.map((loan) => (
-                                    <TableRow key={loan.id}>
-                                        <TableCell className="font-medium">{loan.loan_no}</TableCell>
-                                        <TableCell>{loan.customer?.name}</TableCell>
-                                        <TableCell>{loan.branch?.name}</TableCell>
-                                        <TableCell>{loan.principal_amount.toLocaleString()}</TableCell>
-                                        <TableCell>{loan.term} months</TableCell>
-                                        <TableCell>{loan.interest_rate}%</TableCell>
-                                        <TableCell>
-                                            <Badge variant={statusVariant(loan.status)}>{loan.status}</Badge>
-                                        </TableCell>
-                                        <TableCell>{new Date(loan.created_at).toLocaleDateString()}</TableCell>
-                                        <TableCell className="space-x-2 text-right">
-                                            <Button size="sm" variant="outline" asChild>
-                                                <Link href={route('loans.show', loan.id)}>View</Link>
-                                            </Button>
-
-                                            {loan.status === 'pending' && (
-                                                <Button size="sm" asChild>
-                                                    <Link href={route('loans.approve', loan.id)}>Approve</Link>
-                                                </Button>
-                                            )}
-                                        </TableCell>
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Loan List</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>Loan No</TableHead>
+                                        <TableHead>Customer</TableHead>
+                                        <TableHead>Branch</TableHead>
+                                        <TableHead>Principal</TableHead>
+                                        <TableHead>Term</TableHead>
+                                        <TableHead>Interest</TableHead>
+                                        <TableHead>Status</TableHead>
+                                        <TableHead>Created</TableHead>
+                                        <TableHead className="text-right">Actions</TableHead>
                                     </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                    </CardContent>
-                </Card>
+                                </TableHeader>
+
+                                <TableBody>
+                                    {loans.data.map((loan) => (
+                                        <TableRow key={loan.id}>
+                                            <TableCell className="font-medium">{loan.loan_no}</TableCell>
+                                            <TableCell>{loan.customer?.name}</TableCell>
+                                            <TableCell>{loan.branch?.name}</TableCell>
+                                            <TableCell>{loan.principal_amount.toLocaleString()}</TableCell>
+                                            <TableCell>{loan.term} months</TableCell>
+                                            <TableCell>{loan.interest_rate}%</TableCell>
+                                            <TableCell>
+                                                <Badge variant={statusVariant(loan.status)}>{loan.status}</Badge>
+                                            </TableCell>
+                                            <TableCell>{new Date(loan.created_at).toLocaleDateString()}</TableCell>
+                                            <TableCell className="space-x-2 text-right">
+                                                <Button size="sm" variant="outline" asChild>
+                                                    <Link href={route('loans.show', loan.id)}>View</Link>
+                                                </Button>
+
+                                                {loan.status === 'pending' && (
+                                                    <Button size="sm" asChild>
+                                                        <Link href={route('loans.approve', loan.id)}>Approve</Link>
+                                                    </Button>
+                                                )}
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </CardContent>
+                    </Card>
+                </div>
             </AppLayout>
         </>
     );

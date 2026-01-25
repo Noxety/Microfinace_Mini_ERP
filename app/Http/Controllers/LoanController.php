@@ -5,7 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\Customer;
 use App\Models\Loan;
 use App\Models\LoanSchedule;
+use App\Models\LoanTransaction;
+use App\Models\Repayment;
 use App\Services\LoanScheduleService;
+use App\Services\PenaltyService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -85,8 +88,8 @@ class LoanController extends Controller
                     'tenure' => 'Tenure must be at least 1 month.',
                 ]);
             }
-            $monthlyPrincipal = $loan->amount / $loan->term;
-            $monthlyInterest = ($loan->amount * $loan->interest_rate / 100) / $loan->term;
+            $monthlyPrincipal = $request->loan_amount / $request->tenure;
+            $monthlyInterest = ($request->loan_amount * $customer->creditLevel->interest_rate / 100) / $request->tenure;
 
             for ($i = 1; $i <= $loan->term; $i++) {
                 LoanSchedule::create([
@@ -136,5 +139,115 @@ class LoanController extends Controller
         return redirect()
             ->route('loans.show', $loan)
             ->with('success', 'Loan approved successfully');
+    }
+    public function disburse(Request $request, Loan $loan)
+    {
+        if ($loan->status !== 'approved') {
+            throw ValidationException::withMessages([
+                'loan' => 'Only approved loans can be disbursed.',
+            ]);
+        }
+        $request->validate([
+            'disbursed_amount' => ['required', 'numeric', 'min:1'],
+            'disbursed_date' => ['required', 'date'],
+        ]);
+        if ($request->disbursed_amount > $loan->principal_amount) {
+            throw ValidationException::withMessages([
+                'disbursed_amount' => 'Disbursed amount cannot exceed loan principal.',
+            ]);
+        }
+        DB::transaction(function () use ($loan, $request) {
+            $loan->update([
+                'status' => 'disbursed',
+                'disbursed_amount' => $request->disbursed_amount,
+                'disbursed_at' => $request->disbursed_date,
+                'disbursed_by' => auth()->id(),
+            ]);
+            $loan->schedules()->update([
+                'status' => 'pending',
+            ]);
+        });
+        return redirect()
+            ->route('loans.show', $loan)
+            ->with('success', 'Loan disbursed successfully');
+    }
+    public function repayments(Request $request, LoanSchedule $loanSchedule)
+    {
+
+        $request->validate([
+            'amount' => ['required', 'numeric', 'min:1'],
+            'paid_date' => ['required', 'date'],
+        ]);
+
+        $loan = $loanSchedule->loan;
+        if ($loan->status !== 'disbursed') {
+            throw ValidationException::withMessages([
+                'loan' => 'Loan is not disbursed.',
+            ]);
+        }
+        $remaining = $loanSchedule->total_due - $loanSchedule->paid_amount;
+
+        if ($request->amount > $remaining) {
+            throw ValidationException::withMessages([
+                'amount' => 'Payment exceeds remaining balance.',
+            ]);
+        }
+        DB::transaction(function () use ($request, $loanSchedule, $loan) {
+            $repayment = Repayment::create([
+                'loan_id' => $loan->id,
+                'loan_schedule_id' => $loanSchedule->id,
+                'customer_id' => $loan->customer_id,
+                'branch_id' => $loan->branch_id,
+                'amount' => $request->amount,
+                'payment_date' => $request->paid_date,
+                'collected_by' => auth()->id(),
+                'payment_method' => 'cash',
+                'created_by' => auth()->id(),
+            ]);
+            $loanSchedule->paid_amount += $request->amount;
+
+            if ($loanSchedule->paid_amount >= $loanSchedule->total_due) {
+                $loanSchedule->status = 'paid';
+                $loanSchedule->paid_date = $request->paid_date;
+            } else {
+                $loanSchedule->status = 'partial';
+            }
+            $penalty = PenaltyService::calculate($loanSchedule);
+            $totalDueWithPenalty = ($loanSchedule->total_due - $loanSchedule->paid_amount) + $penalty['amount'];
+            $loanSchedule->penalty_amount = $penalty['amount'];
+            $loanSchedule->overdue_days = $penalty['days'];
+
+            if ($penalty['amount'] > 0) {
+                if ($request->amount > $totalDueWithPenalty) {
+                    throw ValidationException::withMessages([
+                        'amount' => 'Payment exceeds total due including penalty.',
+                    ]);
+                }
+            }
+            $loanSchedule->save();
+            LoanTransaction::create([
+                'loan_id' => $loan->id,
+                'customer_id' => $loan->customer_id,
+                'branch_id' => $loan->branch_id,
+                'loan_schedule_id' => $loanSchedule->id,
+                'trx_no' => 'TRX-' . strtoupper(uniqid()),
+                'trx_type' => 'repayment',
+                'amount' => $request->amount,
+                'balance' => $loanSchedule->total_due - $loanSchedule->paid_amount,
+                'repayment_id' => $repayment->id,
+                'trx_date' => $request->paid_date,
+                'created_by' => auth()->id(),
+            ]);
+            $unpaid = $loan->schedules()
+                ->where('status', '!=', 'paid')
+                ->exists();
+            if (!$unpaid) {
+                $loan->status = 'completed';
+                $loan->end_date = now();
+                $loan->save();
+            }
+        });
+
+        return back()->with('success', 'Repayment recorded successfully.');
     }
 }

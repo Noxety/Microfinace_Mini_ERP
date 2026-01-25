@@ -51,6 +51,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('loans/disburse', [LoanController::class, 'disburse'])->name('loans.disburse');
         Route::post('loans/preview', [LoanController::class, 'preview'])->name('loans.preview');
         Route::get('loans/{loan}/approve', [LoanController::class, 'approve'])->name('loans.approve');
+        Route::post('loans/{loan}/disburse', [LoanController::class, 'disburse'])->name('loans.disburse');
+        Route::post('repayments/{loanSchedule}', [LoanController::class, 'repayments'])->name('loans.repayments');
         Route::resource('users', UserController::class);
         Route::resource('roles', RoleController::class);
         Route::resource('permissions', PermissionController::class);
