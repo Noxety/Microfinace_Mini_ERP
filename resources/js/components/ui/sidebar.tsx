@@ -243,7 +243,7 @@ function Sidebar({
     border border-white/20 dark:border-white/10
     group-data-[variant=floating]:rounded-lg
     group-data-[variant=floating]:shadow-[0_8px_32px_rgba(0,0,0,0.2)]
-    bg-gradient-to-b from-white/[0.12] to-transparent
+    bg-gradient-to-tl from-white/[0.12] to-transparent
     transition-all duration-300
   "
         >

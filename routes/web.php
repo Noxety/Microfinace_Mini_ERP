@@ -4,6 +4,7 @@ use App\Http\Controllers\AssignmentController;
 use App\Http\Controllers\AssignmentSubmissionController;
 use App\Http\Controllers\Auth\SocialLoginController;
 use App\Http\Controllers\BranchController;
+use App\Http\Controllers\CashDashboardController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\CourseController;
@@ -40,13 +41,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/rooms/{roomId}', [ChatController::class, 'show'])
         ->name('rooms.show');
     Route::post('/chat/send', [ChatController::class, 'send'])->name('chat.send');
-    Route::get('dashboard', function () {
-        return Inertia::render('dashboard', [
-            'userRole' => Auth::user()->role,
-        ]);
-    })->name('dashboard');
+    Route::get('dashboard',  [CashDashboardController::class , 'dashboard'])->name('dashboard');
     Route::middleware([AdminOnly::class])->group(function () {
-
+        Route::get('cash-dashboard', [CashDashboardController::class, 'index'])->name('cash.dashboard');
         Route::post('loans/approve', [LoanController::class, 'approve'])->name('loans.approve');
         Route::post('loans/disburse', [LoanController::class, 'disburse'])->name('loans.disburse');
         Route::post('loans/preview', [LoanController::class, 'preview'])->name('loans.preview');

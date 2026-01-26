@@ -18,4 +18,17 @@ class Branch extends Model
     {
         return $this->belongsTo(Location::class, 'location_id', 'id');
     }
+    public function cashBalance()
+    {
+        return $this->cashLedgers()
+            ->selectRaw("
+            COALESCE(SUM(
+                CASE 
+                    WHEN type = 'inflow' THEN amount 
+                    ELSE -amount 
+                END
+            ), 0) as balance
+        ")
+            ->value('balance');
+    }
 }

@@ -4,19 +4,22 @@ import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavGroup, type NavItem } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { CableIcon, Coins, CreditCard, Key, LayoutGrid, LocateIcon, Settings, Shield, StoreIcon, User2, UserCircle, Users } from 'lucide-react';
+import { CableIcon, Coins, CoinsIcon, CreditCard, Key, LayoutGrid, LocateIcon, Settings, Shield, StoreIcon, User2, UserCircle, Users } from 'lucide-react';
 import AppLogo from './app-logo';
 
 export function AppSidebar() {
     const page = usePage();
     const user = page.props.auth.user;
-    console.log(user);
-
     const mainNavItems: NavItem[] = [
         {
             title: 'Dashboard',
             href: '/dashboard',
             icon: LayoutGrid,
+        },
+        {
+            title: 'Loan Cash Dashboard',
+            href: '/cash-dashboard',
+            icon: CoinsIcon,
         },
     ];
 

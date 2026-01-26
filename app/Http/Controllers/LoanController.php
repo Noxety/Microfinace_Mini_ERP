@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CashLedger;
 use App\Models\Customer;
 use App\Models\Loan;
 use App\Models\LoanSchedule;
@@ -157,6 +158,27 @@ class LoanController extends Controller
             ]);
         }
         DB::transaction(function () use ($loan, $request) {
+            $transaction = LoanTransaction::create([
+                'loan_id' => $loan->id,
+                'trx_type' => 'disbursement',
+                'customer_id' => $loan->customer_id,
+                'branch_id' => $loan->branch_id,
+                'amount' => $request->disbursed_amount,
+                'trx_date' => now(),
+                'balance' => $request->disbursed_amount,
+                'trx_no' => 'TRX-' . strtoupper(uniqid()),
+                'created_by' => auth()->id(),
+            ]);
+
+            CashLedger::create([
+                'branch_id' => $loan->branch_id,
+                'type' => 'outflow',
+                'amount' => $request->disbursed_amount,
+                'loan_transaction_id' => $transaction->id,
+                'description' => "Loan disbursement ({$loan->loan_no})",
+                'transaction_date' => now(),
+                'created_by' => auth()->id(),
+            ]);
             $loan->update([
                 'status' => 'disbursed',
                 'disbursed_amount' => $request->disbursed_amount,
@@ -225,7 +247,7 @@ class LoanController extends Controller
                 }
             }
             $loanSchedule->save();
-            LoanTransaction::create([
+            $transaction = LoanTransaction::create([
                 'loan_id' => $loan->id,
                 'customer_id' => $loan->customer_id,
                 'branch_id' => $loan->branch_id,
@@ -236,6 +258,15 @@ class LoanController extends Controller
                 'balance' => $loanSchedule->total_due - $loanSchedule->paid_amount,
                 'repayment_id' => $repayment->id,
                 'trx_date' => $request->paid_date,
+                'created_by' => auth()->id(),
+            ]);
+            CashLedger::create([
+                'branch_id' => $loan->branch_id,
+                'type' => 'inflow',
+                'amount' => $request->amount,
+                'loan_transaction_id' => $transaction->id,
+                'description' => "Loan repayment ({$loan->loan_no})",
+                'transaction_date' => $request->paid_date ?? now(),
                 'created_by' => auth()->id(),
             ]);
             $unpaid = $loan->schedules()
