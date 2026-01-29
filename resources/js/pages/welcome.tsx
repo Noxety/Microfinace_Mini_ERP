@@ -1,138 +1,163 @@
-import FloatingLines from '@/components/FloatingLines';
-import { type SharedData } from '@/types';
-import { Head, Link, usePage } from '@inertiajs/react';
+import ColorBends from '@/components/ColorBends';
+import { Head, Link } from '@inertiajs/react';
 
-export default function Welcome() {
-    const { auth } = usePage<SharedData>().props;
-
+export default function Welcome({ auth }: { auth: { user: any } }) {
     return (
         <>
-            <Head title="Welcome">
+            <Head title="Unity Microfinance ERP">
                 <link rel="preconnect" href="https://fonts.bunny.net" />
                 <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
             </Head>
-            {/* <div className="pointer-events-none fixed ">
-                <FloatingLines
-                    linesGradient={['#E945F5', '#2F4BC0', '#E945F5']}
-                    animationSpeed={1}
-                    interactive
-                    bendRadius={5}
-                    bendStrength={-0.5}
-                    mouseDamping={0.05}
-                    parallax
-                    parallaxStrength={0.2}
-                />
-            </div> */}
-            {/* Navigation */}
-            <header className="mx-auto mb-8 w-full max-w-[335px] px-4 text-sm not-has-[nav]:hidden lg:max-w-7xl lg:px-8">
-                <nav className="flex items-center justify-end gap-4 py-6">
-                    {auth.user ? (
-                        <Link
-                            href={route('dashboard')}
-                            className="inline-block rounded-sm border border-[#19140035] px-5 py-1.5 text-sm leading-normal text-[#1b1b18] transition-colors hover:border-[#1915014a] dark:border-[#3E3E3A] dark:text-[#EDEDEC] dark:hover:border-[#62605b]"
-                        >
-                            Dashboard
-                        </Link>
-                    ) : (
-                        <Link
-                            href={route('login')}
-                            className="inline-block rounded-sm border border-transparent px-5 py-1.5 text-sm leading-normal text-[#1b1b18] transition-colors hover:border-[#19140035] dark:text-[#EDEDEC] dark:hover:border-[#3E3E3A]"
-                        >
-                            Log in
-                        </Link>
-                    )}
-                </nav>
-            </header>
 
-            {/* Hero Section */}
-            <main className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
-                <div className="mb-20 text-center">
-                    <h1 className="mb-6 text-4xl leading-tight font-medium text-[#1b1b18] md:text-6xl lg:text-7xl dark:text-[#EDEDEC]">
-                        Welcome to
-                        <span className="block bg-gradient-to-r from-[#191400] to-[#4a4100] bg-clip-text text-transparent dark:from-[#EDEDEC] dark:to-[#A8A19F]">
-                            Your App
-                        </span>
-                    </h1>
-                    <p className="mx-auto mb-10 max-w-2xl text-xl leading-relaxed text-[#4a4a47] md:text-2xl dark:text-[#A8A19F]">
-                        Build amazing applications with speed and simplicity. Get started in minutes with our modern stack.
-                    </p>
-                    {!auth.user && (
-                        <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
-                            <Link
-                                href={route('login')}
-                                className="inline-flex transform items-center rounded-xl bg-gradient-to-r from-[#191400] to-[#4a4100] px-8 py-4 text-lg font-medium text-white shadow-lg transition-all duration-300 hover:-translate-y-1 hover:from-[#191400]/90 hover:to-[#4a4100]/90 hover:shadow-xl"
-                            >
-                                Get Started
-                            </Link>
-                        </div>
-                    )}
+            <div
+                className="relative min-h-screen w-full overflow-hidden text-[13px]"
+                style={{
+                    fontFamily: '"Instrument Sans", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+                }}
+            >
+                <div className="pointer-events-none fixed inset-0 z-10">
+                    <div className="absolute inset-0">
+                        <ColorBends
+                            rotation={190}
+                            speed={0.5}
+                            colors={['#0aff68', '#62f4dc', '#66ffa1']}
+                            transparent
+                            autoRotate={0}
+                            scale={1}
+                            frequency={1}
+                            warpStrength={1}
+                            mouseInfluence={1}
+                            parallax={0.5}
+                            noise={0.1}
+                            className="absolute inset-0"
+                        />
+                    </div>
+                    {/* <div className="absolute inset-0 bg-gradient-to-b from-white/70 via-white/50 to-white/80 dark:from-black/60 dark:via-black/40 dark:to-black/70" /> */}
                 </div>
 
-                {/* Features */}
-                <section className="mb-24 grid gap-8 md:grid-cols-3">
-                    <div className="rounded-2xl border border-[#19140010] bg-white/10 bg-gradient-to-br p-8 text-center backdrop-blur-md transition-all duration-300 hover:border-[#19140035] hover:shadow-lg dark:border-[#3E3E3A]/50 dark:bg-black/20 dark:from-[#1f1f1d]/80 dark:to-[#2a2a28]/80 hover:dark:border-[#62605b]/50">
-                        <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-r from-[#191400] to-[#4a4100]">
-                            <svg className="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                            </svg>
-                        </div>
-                        <h3 className="mb-4 text-xl font-semibold text-[#1b1b18] dark:text-[#EDEDEC]">Lightning Fast</h3>
-                        <p className="text-[#4a4a47] dark:text-[#A8A19F]">
-                            Built with modern React and Inertia.js for incredible performance and developer experience.
-                        </p>
-                    </div>
+                <div className="relative z-10 bg-transparent">
+                    <header className="mx-auto mb-8 w-full max-w-[335px] px-4 pt-4 text-sm lg:max-w-7xl lg:px-8">
+                        <nav className="flex items-center justify-between gap-4 py-4">
+                            <div className="flex items-center gap-2">
+                                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-black/90 text-white shadow-sm dark:bg-white/90 dark:text-black">
+                                    <span className="text-xs font-semibold tracking-tight">U</span>
+                                </div>
+                                <div className="flex flex-col leading-tight">
+                                    <span className="text-xs font-semibold tracking-[0.18em] text-neutral-700 uppercase dark:text-neutral-200">
+                                        Unity Microfinance Ltd
+                                    </span>
+                                    <span className="text-[11px] text-neutral-500 dark:text-neutral-400">Enterprise ERP · Progressive Web App</span>
+                                </div>
+                            </div>
 
-                    <div className="rounded-2xl border border-[#19140010] bg-white/10 bg-gradient-to-br p-8 text-center backdrop-blur-md transition-all duration-300 hover:border-[#19140035] hover:shadow-lg dark:border-[#3E3E3A]/50 dark:bg-black/20 dark:from-[#1f1f1d]/80 dark:to-[#2a2a28]/80 hover:dark:border-[#62605b]/50">
-                        <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-r from-[#191400] to-[#4a4100]">
-                            <svg className="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                                />
-                            </svg>
-                        </div>
-                        <h3 className="mb-4 text-xl font-semibold text-[#1b1b18] dark:text-[#EDEDEC]">Simple Setup</h3>
-                        <p className="text-[#4a4a47] dark:text-[#A8A19F]">
-                            Get started immediately with our battle-tested authentication and scaffolding.
-                        </p>
-                    </div>
+                            <div className="flex items-center gap-3">
+                                {auth.user ? (
+                                    <Link
+                                        href={route('dashboard')}
+                                        className="inline-flex items-center rounded-sm border border-[#19140035] bg-white/70 px-4 py-1.5 text-xs font-medium text-[#1b1b18] backdrop-blur-sm transition hover:border-[#1915014a] hover:bg-white dark:border-[#3E3E3A] dark:bg-[#141412e6] dark:text-[#EDEDEC] dark:hover:border-[#62605b]"
+                                    >
+                                        Go to dashboard
+                                    </Link>
+                                ) : (
+                                    <Link
+                                        href={route('login')}
+                                        className="inline-flex items-center rounded-sm border border-transparent bg-white/70 px-4 py-1.5 text-xs font-medium text-[#1b1b18] backdrop-blur-sm transition hover:border-[#19140035] hover:bg-white dark:bg-[#141412e6] dark:text-[#EDEDEC] dark:hover:border-[#3E3E3A]"
+                                    >
+                                        login
+                                    </Link>
+                                )}
+                            </div>
+                        </nav>
+                    </header>
+                    <main className="mx-auto flex min-h-[calc(100vh-80px)] w-full max-w-[335px] flex-col px-4 pb-10 lg:max-w-7xl lg:flex-row lg:items-center lg:gap-16 lg:px-8">
+                        <section className="flex-1 space-y-5 pt-4 pb-10 lg:pt-0">
+                            <span className="inline-flex items-center rounded-full border border-white/60 bg-white/80 px-3 py-1 text-[10px] font-medium tracking-[0.18em] text-neutral-600 uppercase shadow-sm backdrop-blur-sm dark:border-white/10 dark:bg-white/10 dark:text-neutral-200">
+                                Unity Microfinance ERP · PWA
+                            </span>
 
-                    <div className="rounded-2xl border border-[#19140010] bg-white/10 bg-gradient-to-br p-8 text-center backdrop-blur-md transition-all duration-300 hover:border-[#19140035] hover:shadow-lg dark:border-[#3E3E3A]/50 dark:bg-black/20 dark:from-[#1f1f1d]/80 dark:to-[#2a2a28]/80 hover:dark:border-[#62605b]/50">
-                        <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-r from-[#191400] to-[#4a4100]">
-                            <svg className="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-                                />
-                            </svg>
-                        </div>
-                        <h3 className="mb-4 text-xl font-semibold text-[#1b1b18] dark:text-[#EDEDEC]">Beautiful Design</h3>
-                        <p className="text-[#4a4a47] dark:text-[#A8A19F]">
-                            Modern, accessible design system that looks great on every device and screen size.
-                        </p>
-                    </div>
-                </section>
+                            <h1 className="text-3xl font-semibold tracking-tight text-neutral-900 sm:text-4xl lg:text-5xl dark:text-neutral-50">
+                                Welcome to your unified microfinance operations workspace.
+                            </h1>
 
-                {/* CTA Section */}
-                {!auth.user && (
-                    <div className="rounded-3xl bg-gradient-to-r from-[#f8f7f5]/50 to-[#f5f4f2]/50 py-20 text-center backdrop-blur-sm dark:from-[#2a2a28]/50 dark:to-[#252524]/50">
-                        <h2 className="mb-6 text-3xl font-semibold text-[#1b1b18] md:text-4xl dark:text-[#EDEDEC]">Ready to get started?</h2>
-                        <p className="mx-auto mb-10 max-w-md text-xl text-[#4a4a47] dark:text-[#A8A19F]">
-                            Join thousands of developers building with our platform today.
-                        </p>
-                        <Link
-                            href={route('login')}
-                            className="inline-flex transform items-center rounded-2xl bg-gradient-to-r from-[#191400] to-[#4a4100] px-10 py-5 text-xl font-semibold text-white shadow-xl transition-all duration-300 hover:-translate-y-1 hover:from-[#191400]/90 hover:to-[#4a4100]/90 hover:shadow-2xl"
-                        >
-                            Log In Now
-                        </Link>
-                    </div>
-                )}
-            </main>
+                            <p className="max-w-xl text-[13px] leading-relaxed text-neutral-700 dark:text-neutral-300">
+                                Unity ERP connects branches, loan officers, and head office in one secure browser‑based system. Access loans, savings,
+                                groups, accounting, and reports from any device with a single sign‑on.
+                            </p>
+
+                            <div className="flex flex-wrap items-center gap-3 pt-1">
+                                {auth.user ? (
+                                    <Link
+                                        href={route('dashboard')}
+                                        className="inline-flex items-center justify-center rounded-md border border-neutral-900/20 bg-neutral-900 px-4 py-2 text-xs font-medium text-white shadow-sm transition hover:bg-black dark:border-white/10 dark:bg-white dark:text-black dark:hover:bg-neutral-100"
+                                    >
+                                        Go to dashboard
+                                    </Link>
+                                ) : (
+                                    <Link
+                                        href={route('login')}
+                                        className="inline-flex items-center justify-center rounded-md border border-neutral-900/20 bg-neutral-900 px-4 py-2 text-xs font-medium text-white shadow-sm transition hover:bg-black dark:border-white/10 dark:bg-white dark:text-black dark:hover:bg-neutral-100"
+                                    >
+                                        Proceed to secure login
+                                    </Link>
+                                )}
+                            </div>
+
+                            <div className="flex flex-wrap gap-4 pt-3 text-[11px] text-neutral-600 dark:text-neutral-400">
+                                <div>
+                                    <span className="font-semibold text-neutral-900 dark:text-neutral-100">Branch &amp; field‑ready</span> optimized
+                                    for loan officers, cashiers, and managers.
+                                </div>
+                            </div>
+                        </section>
+                        <section className="flex-1 pb-10 lg:pb-0">
+                            <div className="mx-auto max-w-md rounded-3xl border border-white/80 bg-white/85 p-5 shadow-xl backdrop-blur-2xl dark:border-white/10 dark:bg-[#050507]/92">
+                                <div className="mb-3 flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                        <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-neutral-900 text-white dark:bg-white dark:text-black">
+                                            <span className="text-[11px] font-semibold">U</span>
+                                        </div>
+                                        <div className="flex flex-col leading-tight">
+                                            <span className="text-[11px] font-semibold text-neutral-900 dark:text-neutral-50">
+                                                Unity Microfinance Ltd
+                                            </span>
+                                            <span className="text-[10px] text-neutral-500 dark:text-neutral-400">Staff access portal</span>
+                                        </div>
+                                    </div>
+                                    <span className="rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-medium text-emerald-700 dark:text-emerald-300">
+                                        Secure · SSL
+                                    </span>
+                                </div>
+
+                                <p className="mb-3 text-[11px] text-neutral-600 dark:text-neutral-300">
+                                    Continue to the login screen with your Unity credentials. Access is restricted to authorized Unity Microfinance
+                                    staff.
+                                </p>
+
+                                {auth.user ? (
+                                    <Link
+                                        href={route('dashboard')}
+                                        className="mb-3 inline-flex w-full items-center justify-center rounded-md bg-neutral-900 px-3 py-1.5 text-[11px] font-medium text-white hover:bg-black dark:bg-white dark:text-black"
+                                    >
+                                        Go to dashboard
+                                    </Link>
+                                ) : (
+                                    <Link
+                                        href={route('login')}
+                                        className="mb-3 inline-flex w-full items-center justify-center rounded-md bg-neutral-900 px-3 py-1.5 text-[11px] font-medium text-white hover:bg-black dark:bg-white dark:text-black"
+                                    >
+                                        Go to login
+                                    </Link>
+                                )}
+
+                                <div className="space-y-1 text-[10px] text-neutral-500 dark:text-neutral-400">
+                                    <div>Branch staff · Head office · Internal audit · IT admin.</div>
+                                    <div>Having trouble? Contact IT support or your branch administrator before attempting to log in again.</div>
+                                </div>
+                            </div>
+                        </section>
+                    </main>
+                </div>
+            </div>
         </>
     );
 }
