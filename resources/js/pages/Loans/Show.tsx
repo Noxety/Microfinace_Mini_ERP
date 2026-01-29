@@ -30,7 +30,7 @@ export default function LoanShow({ loan }) {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Loans Detail" />
-            <div className="space-y-6">
+            <div className="space-y-6 p-4">
                 {/* Loan Summary */}
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between">
@@ -75,7 +75,7 @@ export default function LoanShow({ loan }) {
 
                 {/* Actions */}
                 {loan.status === 'pending' && (
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 justify-end">
                         <Button onClick={() => router.get(route('loans.approve', loan.id))}>Approve Loan</Button>
                     </div>
                 )}
