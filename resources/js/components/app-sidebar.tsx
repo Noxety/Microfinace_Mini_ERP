@@ -1,3 +1,4 @@
+import { usePermission } from '@/hooks/usePermission';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
@@ -10,6 +11,8 @@ import AppLogo from './app-logo';
 export function AppSidebar() {
     const page = usePage();
     const user = page.props.auth.user;
+    const { hasPermission, hasAny } = usePermission();
+    console.log(user);
     const mainNavItems: NavItem[] = [
         {
             title: 'Dashboard',
@@ -23,104 +26,59 @@ export function AppSidebar() {
         },
     ];
 
-    // Add PMS navigation items
-    // const pmsNavItems: NavItem[] = [
-    //     {
-    //         title: 'Projects',
-    //         href: '/projects',
-    //         icon: Briefcase,
-    //     },
-    //     {
-    //         title: 'Tasks',
-    //         href: '/tasks',
-    //         icon: Folder,
-    //     },
-    // ];
-
-    // Add admin navigation items
     const adminNavItems: NavItem[] = [
-        {
-            title: 'Users',
-            href: '/users',
-            icon: Users,
-        },
-        {
-            title: 'Roles',
-            href: '/roles',
-            icon: Shield,
-        },
-        {
-            title: 'Permissions',
-            href: '/permissions',
-            icon: Key,
-        },
-    ];
-    const CustomerNavItem: NavItem[] = [
-        {
-            title: 'Credit Limits',
-            href: '/creditlevels',
-            icon: Coins,
-        },
-        {
-            title: 'Customers',
-            href: '/customers',
-            icon: UserCircle,
-        },
-        {
-            title: 'Loans',
-            href: '/loans',
-            icon: CreditCard,
-        },
-    ];
+        { title: 'Users', href: '/users', icon: Users, permission: 'view_users' },
+        { title: 'Roles', href: '/roles', icon: Shield, permission: 'view_roles' },
+        { title: 'Permissions', href: '/permissions', icon: Key, permission: 'view_permissions' },
+    ].filter((item) => hasPermission((item as NavItem & { permission: string }).permission)) as NavItem[];
+
+    const customerNavItems: NavItem[] = [
+        { title: 'Credit Limits', href: '/creditlevels', icon: Coins, permission: 'view_creditlevels' },
+        { title: 'Customers', href: '/customers', icon: UserCircle, permission: 'view_customers' },
+        { title: 'Loans', href: '/loans', icon: CreditCard, permission: 'view_loans' },
+    ].filter((item) => hasPermission((item as NavItem & { permission: string }).permission)) as NavItem[];
+
     const masterNavItems: NavItem[] = [
-        {
-            title: 'Currency',
-            href: '/currencies',
-            icon: Coins,
-        },
-        {
-            title: 'Departments',
-            href: '/departments',
-            icon: CableIcon,
-        },
-        {
-            title: 'Locations',
-            href: '/locations',
-            icon: LocateIcon,
-        },
-        {
-            title: 'Branches',
-            href: '/branches',
-            icon: StoreIcon,
-        },
-    ];
+        { title: 'Currency', href: '/currencies', icon: Coins, permission: 'view_currencies' },
+        { title: 'Departments', href: '/departments', icon: CableIcon, permission: 'view_departments' },
+        { title: 'Locations', href: '/locations', icon: LocateIcon, permission: 'view_locations' },
+        { title: 'Branches', href: '/branches', icon: StoreIcon, permission: 'view_branches' },
+    ].filter((item) => hasPermission((item as NavItem & { permission: string }).permission)) as NavItem[];
+
     const footerNavItems: NavItem[] = [];
 
     const navGroups: NavGroup[] = [];
 
-    // All users can access PMS features
-    // navGroups.push({
-    //     title: 'Project Management',
-    //     items: pmsNavItems,
-    // });
+    const hasMasterPermission = hasAny(['view_currencies', 'view_departments', 'view_locations', 'view_branches']);
+    const hasCustomerPermission = hasAny(['view_creditlevels', 'view_customers', 'view_loans']);
+    const hasAdminPermission = hasAny(['view_users', 'view_roles', 'view_permissions']);
 
-    // Only admins can access admin features
-    if (user.roles?.includes('admin')) {
-        navGroups.push({
-            title: 'Master Setup',
-            items: masterNavItems,
-            icon: Settings,
-        });
-        navGroups.push({
-            title: 'Customers Setup',
-            items: CustomerNavItem,
-            icon: User2,
-        });
-        navGroups.push({
-            title: 'Administration',
-            items: adminNavItems,
-            icon: Users,
-        });
+    if ( hasMasterPermission) {
+        if (masterNavItems.length > 0) {
+            navGroups.push({
+                title: 'Master Setup',
+                items: masterNavItems,
+                icon: Settings,
+            });
+        }
+    }
+    if ( hasCustomerPermission) {
+        if (customerNavItems.length > 0) {
+            navGroups.push({
+                title: 'Customers Setup',
+                items: customerNavItems,
+                icon: User2,
+            });
+        }
+    }
+    if ( hasAdminPermission) {
+        if (adminNavItems.length > 0) {
+            navGroups.push({
+                title: 'Administration',
+                items: adminNavItems,
+                icon: Users,
+            });
+        }
     }
 
     return (

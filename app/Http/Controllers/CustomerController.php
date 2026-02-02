@@ -6,13 +6,12 @@ use App\Models\Branch;
 use App\Models\CreditLevel;
 use App\Models\Customer;
 use App\Models\CustomerAddress;
-use App\Models\Department;
+use App\Models\CustomerDocument;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
-use League\OAuth1\Client\Credentials\Credentials;
-use Spatie\Permission\Models\Role;
 
 class CustomerController extends Controller
 {
@@ -46,6 +45,14 @@ class CustomerController extends Controller
      */
     public function store(Request $request)
     {
+        $request->validate([
+            'avatar' => 'nullable|image|max:2048',
+            'document_files' => 'nullable|array',
+            'document_files.*' => 'file|max:5120',
+            'document_types' => 'nullable|array',
+            'document_types.*' => 'nullable|string|max:100',
+        ]);
+
         DB::transaction(function () use ($request) {
             $name = trim($request->name);
             if (str_contains($name, ' ')) {
@@ -74,6 +81,12 @@ class CustomerController extends Controller
                 fn($m) => strtoupper($m[0]),
                 preg_split('/(?=[A-Z])/', $middleRaw, -1, PREG_SPLIT_NO_EMPTY)
             ));
+
+            $avatarPath = null;
+            if ($request->hasFile('avatar')) {
+                $avatarPath = $request->file('avatar')->store('customers/avatars', 'public');
+            }
+
             $customer = Customer::create([
                 'branch_id' => $request->branch,
                 'credit_level_id' => $request->creditlevel,
@@ -83,6 +96,7 @@ class CustomerController extends Controller
                 'nrc' => $request->nrc,
                 'phone' => $request->phone,
                 'email' => $request->email,
+                'avatar' => $avatarPath,
                 'dob' => $request->date_of_birth,
                 'gender' => $request->gender,
                 'occupation' => $request->occupation,
@@ -91,6 +105,7 @@ class CustomerController extends Controller
                 'status' => "active",
                 'created_by' => auth()->id(),
             ]);
+
             if ($request->address) {
                 $parts = array_map('trim', explode(',', $request->address));
 
@@ -102,6 +117,18 @@ class CustomerController extends Controller
                     'district' => $parts[1] ?? null,
                     'region' => $parts[2] ?? null,
                 ]);
+            }
+
+            if ($request->hasFile('document_files')) {
+                $types = $request->input('document_types', []);
+                foreach ($request->file('document_files') as $index => $file) {
+                    $path = $file->store('customers/documents', 'public');
+                    $customer->documents()->create([
+                        'type' => $types[$index] ?? 'attachment',
+                        'file_path' => $path,
+                        'uploaded_by' => auth()->id(),
+                    ]);
+                }
             }
         });
         return redirect()
@@ -117,6 +144,8 @@ class CustomerController extends Controller
         $customer = Customer::with([
             'branch.location',
             'creditLevel',
+            'documents',
+            'loans' => fn($q) => $q->with('branch')->orderByDesc('created_at'),
             'addresses' => fn($q) => $q->latest()->limit(1),
         ])->findOrFail($id);
 
@@ -132,7 +161,12 @@ class CustomerController extends Controller
     public function edit(Customer $customer)
     {
         return Inertia::render('Customer/Edit', [
-            'customer' => $customer->load(['branch', 'creditLevel', 'addresses' => fn($q) => $q->latest()->limit(1),]),
+            'customer' => $customer->load([
+                'branch',
+                'creditLevel',
+                'documents',
+                'addresses' => fn($q) => $q->latest()->limit(1),
+            ]),
             'branches' => Branch::with('location')->get(),
             'creditlevel' => CreditLevel::all(),
         ]);
@@ -143,9 +177,25 @@ class CustomerController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        DB::transaction(function () use ($request, $id) {
+        $request->validate([
+            'avatar' => 'nullable|image|max:2048',
+            'document_files' => 'nullable|array',
+            'document_files.*' => 'file|max:5120',
+            'document_types' => 'nullable|array',
+            'document_types.*' => 'nullable|string|max:100',
+        ]);
 
+        DB::transaction(function () use ($request, $id) {
             $customer = Customer::findOrFail($id);
+
+            $avatarPath = $customer->avatar;
+            if ($request->hasFile('avatar')) {
+                if ($customer->avatar && Storage::disk('public')->exists($customer->avatar)) {
+                    Storage::disk('public')->delete($customer->avatar);
+                }
+                $avatarPath = $request->file('avatar')->store('customers/avatars', 'public');
+            }
+
             $customer->update([
                 'branch_id' => $request->branch,
                 'credit_level_id' => $request->creditlevel,
@@ -154,13 +204,14 @@ class CustomerController extends Controller
                 'nrc' => $request->nrc,
                 'phone' => $request->phone,
                 'email' => $request->email,
+                'avatar' => $avatarPath,
                 'dob' => $request->date_of_birth,
                 'gender' => $request->gender,
                 'occupation' => $request->occupation,
                 'monthly_income' => $request->monthly_income,
                 'remark' => $request->remark,
-                'updated_by' => auth()->id(),
             ]);
+
             if ($request->address) {
                 $parts = array_map('trim', explode(',', $request->address));
 
@@ -176,6 +227,18 @@ class CustomerController extends Controller
                         'region' => $parts[2] ?? null,
                     ]
                 );
+            }
+
+            if ($request->hasFile('document_files')) {
+                $types = $request->input('document_types', []);
+                foreach ($request->file('document_files') as $index => $file) {
+                    $path = $file->store('customers/documents', 'public');
+                    $customer->documents()->create([
+                        'type' => $types[$index] ?? 'attachment',
+                        'file_path' => $path,
+                        'uploaded_by' => auth()->id(),
+                    ]);
+                }
             }
         });
 

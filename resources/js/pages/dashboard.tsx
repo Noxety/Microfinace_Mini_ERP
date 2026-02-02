@@ -5,78 +5,100 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
 import { Head, router } from '@inertiajs/react';
-import { BarElement, CategoryScale, Chart as ChartJS, Legend, LinearScale, Title } from 'chart.js';
 import { useState } from 'react';
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 
-ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Legend);
-
 interface Props {
     userRole: string;
+    canViewAllBranches: boolean;
     branches: { id: number; name: string }[];
-    selectedBranch: number;
+    selectedBranch: number | null;
     forecast: { period: string; expected_amount: number }[];
-    buckets: { bucket: string; amount: number }[];
+    buckets: { bucket: string; bucket_key: string; amount: number }[];
     expected_inflow: number;
     expected_outflow: number;
+    active_loans_count: number;
+    approved_pending_count: number;
 }
 
-export default function Dashboard({ userRole, branches, selectedBranch, forecast, buckets, expected_inflow, expected_outflow }: Props) {
-    const [branchId, setBranchId] = useState<number>(selectedBranch);
+function formatPeriod(period: string): string {
+    if (!period || period.length < 7) return period;
+    const [y, m] = period.split('-');
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const monthIndex = parseInt(m, 10) - 1;
+    return `${months[monthIndex] ?? m} ${y}`;
+}
+
+export default function Dashboard({
+    canViewAllBranches,
+    branches,
+    selectedBranch,
+    forecast,
+    buckets,
+    expected_inflow,
+    expected_outflow,
+    active_loans_count = 0,
+    approved_pending_count = 0,
+}: Props) {
+    const [branchId, setBranchId] = useState<number | null>(selectedBranch);
 
     const totalForecast = forecast.reduce((sum, row) => sum + Number(row.expected_amount), 0);
     const totalBuckets = buckets.reduce((sum, b) => sum + Number(b.amount), 0);
     const net = Number(expected_inflow) - Number(expected_outflow);
     const healthy = net >= 0;
+    const hasForecast = forecast.length > 0;
+    const hasOverdue = totalBuckets > 0;
 
-    // Handler to filter by branch
     const handleBranchChange = (value: string) => {
-        const id = Number(value);
+        const id = value === 'all' ? null : Number(value);
         setBranchId(id);
+        router.get(route('dashboard'), id !== null ? { branch_id: id } : {}, { preserveState: true, preserveScroll: true });
+    };
 
-        // Reload dashboard with new branch
-        router.get(route('dashboard'), { branch_id: id }, { preserveState: true, preserveScroll: true });
-    };
-    const options = {
-        responsive: true,
-        plugins: {
-            legend: { position: 'top' as const },
-            title: { display: true, text: 'Cash Flow Projection' },
-        },
-    };
-    // Prepare data for Repayment Forecast chart
     const chartData = forecast.map((row) => ({
-        month: row.period,
+        month: formatPeriod(row.period),
         amount: Number(row.expected_amount),
     }));
+
     return (
         <AppLayout breadcrumbs={[]}>
             <Head title="Finance Dashboard" />
 
-            <div className="bg-background flex h-full flex-1 flex-col gap-6 rounded-xl p-6">
+            <div className="flex h-full flex-1 flex-col gap-6 rounded-xl bg-background p-4 sm:p-6">
                 {/* Page Header */}
-                <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div>
-                        <h1 className="text-3xl font-semibold tracking-tight">Finance Dashboard</h1>
-                        <p className="text-muted-foreground text-sm">Branch-level forecast, overdue risk, and cash position at a glance.</p>
+                        <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">Finance Dashboard</h1>
+                        <p className="mt-1 text-sm text-muted-foreground">
+                            {canViewAllBranches && branchId === null
+                                ? 'Overview across all branches.'
+                                : `Branch: ${branches.find((b) => b.id === branchId)?.name ?? 'All'} — forecast, overdue risk, and cash position.`}
+                        </p>
                     </div>
 
-                    {/* Branch Filter + Period (optional) */}
+                    {/* Branch filter: admin/manager see all branches; others see current branch only */}
                     <div className="flex gap-3">
-                        <div className="w-48">
-                            <Select onValueChange={handleBranchChange} defaultValue={branchId.toString()}>
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Select branch" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {branches.map((b) => (
-                                        <SelectItem key={b.id} value={b.id.toString()}>
-                                            {b.name}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
+                        {canViewAllBranches ? (
+                            <div className="w-48">
+                                <Select onValueChange={handleBranchChange} value={branchId === null ? 'all' : branchId.toString()}>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select branch" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="all">All Branches</SelectItem>
+                                        {branches.map((b) => (
+                                            <SelectItem key={b.id} value={b.id.toString()}>
+                                                {b.name}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        ) : (
+                            <div className="text-muted-foreground flex items-center text-sm">
+                                Branch: {branches.find((b) => b.id === branchId)?.name ?? '—'}
+                            </div>
+                        )}
 
                         {/* Optional: time range filter for forecast */}
                         {/* 
@@ -97,91 +119,103 @@ export default function Dashboard({ userRole, branches, selectedBranch, forecast
                 </div>
 
                 {/* Summary KPIs */}
-                <section className="grid gap-4 md:grid-cols-3">
-                    <Card>
-                        <CardHeader className="space-y-1">
-                            <CardTitle className="text-muted-foreground text-sm font-medium">Total Expected Repayment</CardTitle>
-                            <p className="text-muted-foreground text-xs">Sum of forecasted loan repayments in the selected period.</p>
+                <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                    <Card className="border-emerald-200/50 bg-emerald-50/30 dark:border-emerald-900/30 dark:bg-emerald-950/20">
+                        <CardHeader className="pb-2">
+                            <CardTitle className="text-sm font-medium text-emerald-800 dark:text-emerald-200">Expected Repayment</CardTitle>
+                            <p className="text-xs text-emerald-700/80 dark:text-emerald-300/80">Forecasted repayments (next months)</p>
                         </CardHeader>
                         <CardContent>
-                            <p className="text-2xl font-semibold">{totalForecast.toLocaleString()} MMK</p>
+                            <p className="text-2xl font-bold text-emerald-700 dark:text-emerald-300">{totalForecast.toLocaleString()} MMK</p>
                         </CardContent>
                     </Card>
 
-                    <Card>
-                        <CardHeader className="space-y-1">
-                            <CardTitle className="text-muted-foreground text-sm font-medium">Total Overdue</CardTitle>
-                            <p className="text-muted-foreground text-xs">Outstanding overdue principal across risk buckets.</p>
+                    <Card className="border-rose-200/50 bg-rose-50/30 dark:border-rose-900/30 dark:bg-rose-950/20">
+                        <CardHeader className="pb-2">
+                            <CardTitle className="text-sm font-medium text-rose-800 dark:text-rose-200">Total Overdue</CardTitle>
+                            <p className="text-xs text-rose-700/80 dark:text-rose-300/80">Outstanding overdue amount</p>
                         </CardHeader>
                         <CardContent>
-                            <p className="text-destructive text-2xl font-semibold">{totalBuckets.toLocaleString()} MMK</p>
+                            <p className="text-2xl font-bold text-rose-700 dark:text-rose-300">{totalBuckets.toLocaleString()} MMK</p>
                         </CardContent>
                     </Card>
 
-                    <Card>
-                        <CardHeader className="space-y-1">
-                            <CardTitle className="text-muted-foreground text-sm font-medium">Net Cash Position</CardTitle>
-                            <p className="text-muted-foreground text-xs">Current cash available after expected inflows and outflows.</p>
+                    <Card className={healthy ? 'border-emerald-200/50 bg-emerald-50/30 dark:border-emerald-900/30 dark:bg-emerald-950/20' : 'border-rose-200/50 bg-rose-50/30 dark:border-rose-900/30 dark:bg-rose-950/20'}>
+                        <CardHeader className="pb-2">
+                            <CardTitle className="text-sm font-medium">Net Cash Position</CardTitle>
+                            <p className="text-xs text-muted-foreground">Inflow − planned outflow (90 days)</p>
                         </CardHeader>
                         <CardContent>
-                            <p className={`('text-2xl font-semibold', healthy ? 'text-emerald-600' : 'text-destructive')`}>
+                            <p className={`text-2xl font-bold ${healthy ? 'text-emerald-700 dark:text-emerald-300' : 'text-rose-700 dark:text-rose-300'}`}>
                                 {net.toLocaleString()} MMK
                             </p>
-                            <p className="text-muted-foreground mt-1 text-xs">
-                                Status: <span className={healthy ? 'text-emerald-600' : 'text-destructive'}>{healthy ? 'Healthy' : 'At risk'}</span>
+                            <p className="mt-1 text-xs text-muted-foreground">
+                                Status: <span className={healthy ? 'font-medium text-emerald-600 dark:text-emerald-400' : 'font-medium text-rose-600 dark:text-rose-400'}>{healthy ? 'Healthy' : 'At risk'}</span>
                             </p>
+                        </CardContent>
+                    </Card>
+
+                    <Card>
+                        <CardHeader className="pb-2">
+                            <CardTitle className="text-sm font-medium text-muted-foreground">Loan Summary</CardTitle>
+                            <p className="text-xs text-muted-foreground">Active and pending</p>
+                        </CardHeader>
+                        <CardContent className="space-y-1">
+                            <p className="text-lg font-semibold">{active_loans_count} active</p>
+                            <p className="text-sm text-muted-foreground">{approved_pending_count} approved (pending disbursement)</p>
                         </CardContent>
                     </Card>
                 </section>
 
                 {/* Main Content */}
                 <div className="grid gap-6 lg:grid-cols-3">
-                    {/* Left (Forecast & Overdue) */}
                     <div className="space-y-6 lg:col-span-2">
                         {/* Repayment Forecast */}
                         <Card>
                             <CardHeader className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                                 <div>
                                     <CardTitle>Repayment Forecast</CardTitle>
-                                    <p className="text-muted-foreground text-xs">Expected monthly inflows from loan repayments.</p>
+                                    <p className="text-xs text-muted-foreground">Expected monthly inflows from loan repayments (disbursed loans)</p>
                                 </div>
-                                <Badge variant="secondary">Next {forecast.length} months</Badge>
+                                {hasForecast && <Badge variant="secondary">Next {forecast.length} months</Badge>}
                             </CardHeader>
                             <CardContent>
-                                {/* Chart */}
-                                <div className="h-[260px] w-full">
-                                    <ResponsiveContainer width="100%" height="100%">
-                                        <BarChart data={chartData}>
-                                            <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                                            <XAxis dataKey="month" tickLine={false} axisLine={false} />
-                                            <YAxis tickLine={false} axisLine={false} tickFormatter={(v) => `${v.toLocaleString()} MMK`} />
-                                            <Tooltip formatter={(v: number) => `${v.toLocaleString()} MMK`} />
-                                            <Bar
-                                                dataKey="amount"
-                                                radius={[6, 6, 0, 0]}
-                                                fill="#0F766E" // teal for inflows
-                                            />
-                                        </BarChart>
-                                    </ResponsiveContainer>
-                                </div>
-
-                                {/* Table */}
-                                <Table className="mt-4">
-                                    <TableHeader>
-                                        <TableRow>
-                                            <TableHead>Month</TableHead>
-                                            <TableHead className="text-right">Expected amount (MMK)</TableHead>
-                                        </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                        {forecast.map((f) => (
-                                            <TableRow key={f.period}>
-                                                <TableCell>{f.period}</TableCell>
-                                                <TableCell className="text-right">{Number(f.expected_amount).toLocaleString()}</TableCell>
-                                            </TableRow>
-                                        ))}
-                                    </TableBody>
-                                </Table>
+                                {hasForecast ? (
+                                    <>
+                                        <div className="h-[260px] w-full">
+                                            <ResponsiveContainer width="100%" height="100%">
+                                                <BarChart data={chartData}>
+                                                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                                                    <XAxis dataKey="month" tickLine={false} axisLine={false} />
+                                                    <YAxis tickLine={false} axisLine={false} tickFormatter={(v) => `${Number(v).toLocaleString()}`} />
+                                                    <Tooltip formatter={(v: number) => [`${Number(v).toLocaleString()} MMK`, 'Expected']} />
+                                                    <Bar dataKey="amount" radius={[6, 6, 0, 0]} fill="#0F766E" name="MMK" />
+                                                </BarChart>
+                                            </ResponsiveContainer>
+                                        </div>
+                                        <Table className="mt-4">
+                                            <TableHeader>
+                                                <TableRow>
+                                                    <TableHead>Month</TableHead>
+                                                    <TableHead className="text-right">Expected (MMK)</TableHead>
+                                                </TableRow>
+                                            </TableHeader>
+                                            <TableBody>
+                                                {forecast.map((f) => (
+                                                    <TableRow key={f.period}>
+                                                        <TableCell>{formatPeriod(f.period)}</TableCell>
+                                                        <TableCell className="text-right">{Number(f.expected_amount).toLocaleString()}</TableCell>
+                                                    </TableRow>
+                                                ))}
+                                            </TableBody>
+                                        </Table>
+                                    </>
+                                ) : (
+                                    <div className="flex flex-col items-center justify-center rounded-lg border border-dashed py-12 text-center text-muted-foreground">
+                                        <p className="text-sm font-medium">No forecast data</p>
+                                        <p className="mt-1 text-xs">Disbursed loans with upcoming repayments will appear here.</p>
+                                    </div>
+                                )}
                             </CardContent>
                         </Card>
 
@@ -190,28 +224,24 @@ export default function Dashboard({ userRole, branches, selectedBranch, forecast
                             <CardHeader className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                                 <div>
                                     <CardTitle>Overdue Risk Distribution</CardTitle>
-                                    <p className="text-muted-foreground text-xs">Breakdown of overdue portfolio by risk bucket.</p>
+                                    <p className="text-xs text-muted-foreground">Outstanding overdue by days past due</p>
                                 </div>
-                                <Badge variant="outline">Total {totalBuckets.toLocaleString()} MMK</Badge>
+                                {hasOverdue && <Badge variant="outline">Total {totalBuckets.toLocaleString()} MMK</Badge>}
                             </CardHeader>
                             <CardContent>
-                                <div className="grid gap-4 md:grid-cols-3">
+                                <div className="grid gap-4 sm:grid-cols-3">
                                     {buckets.map((b) => {
                                         const amount = Number(b.amount);
                                         const percent = totalBuckets > 0 ? Math.round((amount / totalBuckets) * 100) : 0;
-
                                         return (
-                                            <div key={b.bucket} className="bg-muted/40 flex flex-col justify-between rounded-lg border p-3">
+                                            <div key={b.bucket_key} className="flex flex-col justify-between rounded-lg border bg-muted/30 p-4">
                                                 <div className="flex items-center justify-between">
                                                     <p className="text-sm font-medium">{b.bucket}</p>
-                                                    <Badge variant="outline" className="text-xs">
-                                                        {percent}%
-                                                    </Badge>
+                                                    <Badge variant="outline" className="text-xs">{percent}%</Badge>
                                                 </div>
                                                 <div className="mt-2 space-y-2">
                                                     <p className="text-lg font-semibold">{amount.toLocaleString()} MMK</p>
-                                                    <Progress value={percent} />
-                                                    <p className="text-muted-foreground text-[11px]">Share of total overdue.</p>
+                                                    <Progress value={percent} className="h-2" />
                                                 </div>
                                             </div>
                                         );
@@ -221,45 +251,33 @@ export default function Dashboard({ userRole, branches, selectedBranch, forecast
                         </Card>
                     </div>
 
-                    {/* Right (Cash Projection) */}
+                    {/* Cash Projection sidebar */}
                     <div className="space-y-6">
                         <Card>
-                            <CardHeader className="flex items-center justify-between">
-                                <div>
-                                    <CardTitle>Cash Projection</CardTitle>
-                                    <p className="text-muted-foreground text-xs">Expected cash movement over the selected period.</p>
-                                </div>
-                                <Badge variant={healthy ? 'secondary' : 'destructive'}>{healthy ? 'Healthy' : 'Risk'}</Badge>
+                            <CardHeader className="flex items-center justify-between pb-2">
+                                <CardTitle className="text-base">Cash Projection</CardTitle>
+                                <Badge variant={healthy ? 'secondary' : 'destructive'}>{healthy ? 'Healthy' : 'At risk'}</Badge>
                             </CardHeader>
                             <CardContent className="space-y-4">
-                                <div className="grid gap-4 md:grid-cols-3">
-                                    <div className="rounded-lg border bg-emerald-50/60 p-3">
-                                        <p className="text-xs font-medium text-emerald-800">Expected inflow</p>
-                                        <p className="mt-1 text-xl font-semibold text-emerald-700">{Number(expected_inflow).toLocaleString()} MMK</p>
-                                        <p className="mt-1 text-[11px] text-emerald-900/70">Loan repayments.</p>
+                                <div className="space-y-3">
+                                    <div className="rounded-lg border border-emerald-200/60 bg-emerald-50/50 p-3 dark:border-emerald-800/40 dark:bg-emerald-950/30">
+                                        <p className="text-xs font-medium text-emerald-800 dark:text-emerald-200">Expected inflow (90 days)</p>
+                                        <p className="mt-1 text-xl font-bold text-emerald-700 dark:text-emerald-300">{Number(expected_inflow).toLocaleString()} MMK</p>
+                                        <p className="mt-0.5 text-xs text-emerald-700/80 dark:text-emerald-400/80">Loan repayments due</p>
                                     </div>
-
-                                    <div className="rounded-lg border bg-rose-50/70 p-3">
-                                        <p className="text-xs font-medium text-rose-800">Expected outflow</p>
-                                        <p className="mt-1 text-xl font-semibold text-rose-700">{Number(expected_outflow).toLocaleString()} MMK</p>
-                                        <p className="mt-1 text-[11px] text-rose-900/70">Planned disbursements.</p>
+                                    <div className="rounded-lg border border-rose-200/60 bg-rose-50/50 p-3 dark:border-rose-800/40 dark:bg-rose-950/30">
+                                        <p className="text-xs font-medium text-rose-800 dark:text-rose-200">Expected outflow</p>
+                                        <p className="mt-1 text-xl font-bold text-rose-700 dark:text-rose-300">{Number(expected_outflow).toLocaleString()} MMK</p>
+                                        <p className="mt-0.5 text-xs text-rose-700/80 dark:text-rose-400/80">Approved, not yet disbursed</p>
                                     </div>
-
-                                    <div className="bg-muted/50 rounded-lg border p-3">
-                                        <p className="text-muted-foreground text-xs font-medium">Net position</p>
-                                        <p className={`('mt-1 text-xl font-semibold', healthy ? 'text-emerald-700' : 'text-destructive')`}>
+                                    <div className={`rounded-lg border p-3 ${healthy ? 'border-emerald-200/60 bg-emerald-50/30 dark:border-emerald-800/30 dark:bg-emerald-950/20' : 'border-rose-200/60 bg-rose-50/30 dark:border-rose-800/30 dark:bg-rose-950/20'}`}>
+                                        <p className="text-xs font-medium text-muted-foreground">Net position</p>
+                                        <p className={`mt-1 text-xl font-bold ${healthy ? 'text-emerald-700 dark:text-emerald-300' : 'text-rose-700 dark:text-rose-300'}`}>
                                             {(Number(expected_inflow) - Number(expected_outflow)).toLocaleString()} MMK
                                         </p>
-                                        <p className="text-muted-foreground mt-1 text-[11px]">Inflow − outflow.</p>
                                     </div>
                                 </div>
-
-                                {/* Optional: small trend hint */}
-                                {/* 
-            <p className="text-xs text-muted-foreground">
-              Tip: A positive net position over consecutive months indicates a comfortable liquidity buffer.
-            </p>
-            */}
+                                <p className="text-xs text-muted-foreground">A positive net position indicates sufficient liquidity for planned disbursements.</p>
                             </CardContent>
                         </Card>
                     </div>

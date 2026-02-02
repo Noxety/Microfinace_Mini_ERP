@@ -10,8 +10,8 @@ import { Textarea } from '@/components/ui/textarea';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, router, useForm } from '@inertiajs/react';
-import { LoaderCircle } from 'lucide-react';
-import { FormEventHandler, useEffect, useState } from 'react';
+import { LoaderCircle, Paperclip, User } from 'lucide-react';
+import { FormEventHandler, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
 interface Role {
@@ -41,7 +41,26 @@ export default function CustomersCreate({ branches, creditlevel }: Props) {
         },
     ];
     const [gender, setGender] = useState(['Male', 'Female', 'Other']);
-    const { data, setData, post, processing, errors, reset } = useForm({
+    const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+    const documentInputRef = useRef<HTMLInputElement>(null);
+    const { data, setData, post, processing, errors, reset } = useForm<{
+        name: string;
+        email: string;
+        nrc: string;
+        gender: string;
+        remark: string;
+        occupation: string;
+        phone: string;
+        address: string;
+        date_of_birth: string;
+        monthly_income: string;
+        creditlevel: string;
+        branch: string;
+        limit_expired_at: string;
+        avatar: File | null;
+        document_files: File[];
+        document_types: string[];
+    }>({
         name: '',
         email: '',
         nrc: '',
@@ -55,18 +74,23 @@ export default function CustomersCreate({ branches, creditlevel }: Props) {
         creditlevel: '',
         branch: '',
         limit_expired_at: '',
+        avatar: null,
+        document_files: [],
+        document_types: [],
     });
 
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
         post(route('customers.store'), {
             preserveScroll: true,
+            forceFormData: true,
             onSuccess: () => {
                 toast.success('Customer created successfully.', {
                     position: 'top-center',
                     duration: 3000,
                 });
                 reset();
+                setAvatarPreview(null);
             },
             onError: () => {
                 toast.error('Error creating Customer. Please check the form.', {
@@ -75,6 +99,37 @@ export default function CustomersCreate({ branches, creditlevel }: Props) {
                 });
             },
         });
+    };
+
+    const onAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            setData('avatar', file);
+            setAvatarPreview(URL.createObjectURL(file));
+        } else {
+            setData('avatar', null);
+            setAvatarPreview(null);
+        }
+    };
+
+    const onDocumentsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = e.target.files ? Array.from(e.target.files) : [];
+        setData('document_files', files);
+        setData('document_types', files.map(() => 'attachment'));
+        e.target.value = '';
+    };
+
+    const removeDocument = (index: number) => {
+        const newFiles = data.document_files.filter((_, i) => i !== index);
+        const newTypes = data.document_types.filter((_, i) => i !== index);
+        setData('document_files', newFiles);
+        setData('document_types', newTypes);
+    };
+
+    const setDocumentType = (index: number, value: string) => {
+        const next = [...data.document_types];
+        next[index] = value;
+        setData('document_types', next);
     };
     const [NRCCodeSelect, setNRCCodeSelect] = useState<any>();
     const [NRCPlaceSelect, setNRCPlaceSelect] = useState<any>();
@@ -115,6 +170,30 @@ export default function CustomersCreate({ branches, creditlevel }: Props) {
                                 <CardTitle>Customers Information</CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-4">
+                                <div className="grid gap-2">
+                                    <Label>Photo (Avatar)</Label>
+                                    <div className="flex items-center gap-4">
+                                        <div className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-full border bg-muted">
+                                            {avatarPreview ? (
+                                                <img src={avatarPreview} alt="Avatar preview" className="h-full w-full object-cover" />
+                                            ) : (
+                                                <User className="text-muted-foreground h-12 w-12" />
+                                            )}
+                                        </div>
+                                        <div>
+                                            <Input
+                                                id="avatar"
+                                                type="file"
+                                                accept="image/*"
+                                                onChange={onAvatarChange}
+                                                disabled={processing}
+                                                className="max-w-xs"
+                                            />
+                                            <p className="text-muted-foreground mt-1 text-xs">PNG, JPG up to 2MB</p>
+                                        </div>
+                                    </div>
+                                    <InputError message={errors.avatar} className="mt-1" />
+                                </div>
                                 <div className="grid gap-2">
                                     <Label htmlFor="name">Name </Label>
                                     <Input
@@ -325,6 +404,48 @@ export default function CustomersCreate({ branches, creditlevel }: Props) {
                                     />
                                     <InputError message={errors.address} />
                                 </div>
+                            </CardContent>
+                        </Card>
+
+                        <Card>
+                            <CardHeader>
+                                <CardTitle className="flex items-center gap-2">
+                                    <Paperclip className="h-5 w-5" /> Attachments
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                                <div className="grid gap-2">
+                                    <Input
+                                        ref={documentInputRef}
+                                        type="file"
+                                        multiple
+                                        accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                                        onChange={onDocumentsChange}
+                                        disabled={processing}
+                                        className="max-w-xs"
+                                    />
+                                    <p className="text-muted-foreground text-xs">PDF, DOC, images up to 5MB each</p>
+                                </div>
+                                {data.document_files.length > 0 && (
+                                    <ul className="space-y-2">
+                                        {data.document_files.map((file, index) => (
+                                            <li key={index} className="flex items-center gap-2 rounded border p-2">
+                                                <span className="text-muted-foreground truncate text-sm flex-1">{file.name}</span>
+                                                <Input
+                                                    type="text"
+                                                    placeholder="Type (e.g. NRC, Contract)"
+                                                    value={data.document_types[index] ?? ''}
+                                                    onChange={(e) => setDocumentType(index, e.target.value)}
+                                                    className="h-8 w-40"
+                                                />
+                                                <Button type="button" variant="ghost" size="sm" onClick={() => removeDocument(index)} disabled={processing}>
+                                                    Remove
+                                                </Button>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                )}
+                                <InputError message={errors.document_files} className="mt-1" />
                             </CardContent>
                         </Card>
 

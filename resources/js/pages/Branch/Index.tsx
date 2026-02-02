@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { usePermission } from '@/hooks/usePermission';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, router, useForm } from '@inertiajs/react';
@@ -36,6 +37,7 @@ interface Props {
 }
 
 export default function branchesIndex({ branches, locations }: Props) {
+    const { hasPermission } = usePermission();
     const [isCreateOpen, setIsCreateOpen] = useState(false);
     const [editingbranches, setEditingbranches] = useState<branch | null>(null);
 
@@ -149,6 +151,7 @@ export default function branchesIndex({ branches, locations }: Props) {
                 <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
                     <div className="my-4 flex items-center justify-between">
                         <h1 className="text-2xl font-bold">Branches Management</h1>
+                        {hasPermission('create_branches') && (
                         <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
                             <DialogTrigger asChild>
                                 <Button className="flex items-center gap-2">
@@ -206,6 +209,7 @@ export default function branchesIndex({ branches, locations }: Props) {
                                 </form>
                             </DialogContent>
                         </Dialog>
+                        )}
                     </div>
 
                     <Card>
@@ -237,12 +241,16 @@ export default function branchesIndex({ branches, locations }: Props) {
                                                 <TableCell className="font-medium">{branch?.location?.name}</TableCell>
                                                 <TableCell className="text-right">
                                                     <div className="flex justify-end gap-2">
-                                                        <Button variant="outline" size="icon" onClick={() => openEditDialog(branch)}>
-                                                            <Pencil className="h-4 w-4" />
-                                                        </Button>
-                                                        <Button variant="outline" size="icon" onClick={() => handleDelete(branch.id)}>
-                                                            <Trash2 className="h-4 w-4" />
-                                                        </Button>
+                                                        {hasPermission('update_branches') && (
+                                                            <Button variant="outline" size="icon" onClick={() => openEditDialog(branch)}>
+                                                                <Pencil className="h-4 w-4" />
+                                                            </Button>
+                                                        )}
+                                                        {hasPermission('delete_branches') && (
+                                                            <Button variant="outline" size="icon" onClick={() => handleDelete(branch.id)}>
+                                                                <Trash2 className="h-4 w-4" />
+                                                            </Button>
+                                                        )}
                                                     </div>
                                                 </TableCell>
                                             </TableRow>

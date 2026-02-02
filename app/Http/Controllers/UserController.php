@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\Employee;
 use App\Models\Department;
+use App\Models\Branch;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -31,6 +32,7 @@ class UserController extends Controller
         return Inertia::render('Users/Create', [
             'roles' => Role::all(),
             'departments' => Department::all(),
+            'branches' => Branch::all(),
         ]);
     }
 
@@ -41,6 +43,7 @@ class UserController extends Controller
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
             'role_id' => 'required|exists:roles,id',
+            'branch_id' => 'nullable|exists:branches,id',
             'bio' => 'nullable|string',
             // Employee fields
             'employee_id' => 'nullable|string|unique:employees,employee_id',
@@ -58,6 +61,7 @@ class UserController extends Controller
             'name' => $validated['name'],
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
+            'branch_id' => $validated['branch_id'] ?? null,
             'bio' => $validated['bio'] ?? null,
         ]);
 
@@ -83,7 +87,7 @@ class UserController extends Controller
 
     public function show(User $user)
     {
-        $user->load(['employee', 'roles']);
+        $user->load(['employee.department', 'roles', 'branch']);
 
         return Inertia::render('Users/Show', [
             'user' => $user,
@@ -98,6 +102,7 @@ class UserController extends Controller
             'user' => $user,
             'roles' => Role::all(),
             'departments' => Department::all(),
+            'branches' => Branch::all(),
         ]);
     }
 
@@ -119,6 +124,7 @@ class UserController extends Controller
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
             'password' => 'nullable|string|min:8|confirmed',
             'role_id' => 'required|exists:roles,id',
+            'branch_id' => 'nullable|exists:branches,id',
             'bio' => 'nullable|string',
             // Employee fields
             'employee_id' => 'nullable|string|unique:employees,employee_id,' . ($user->employee?->id ?? 'NULL'),
@@ -136,6 +142,7 @@ class UserController extends Controller
         $userData = [
             'name' => $validated['name'],
             'email' => $validated['email'],
+            'branch_id' => $validated['branch_id'] ?? null,
             'bio' => $validated['bio'] ?? null,
         ];
 

@@ -16,6 +16,8 @@ class Customer extends Model
         'name',
         'nrc',
         'phone',
+        'email',
+        'avatar',
         'dob',
         'gender',
         'monthly_income',
@@ -50,6 +52,11 @@ class Customer extends Model
     public function creditLevel()
     {
         return $this->belongsTo(CreditLevel::class);
+    }
+
+    public function loans()
+    {
+        return $this->hasMany(Loan::class);
     }
 
     public function availableLimit()

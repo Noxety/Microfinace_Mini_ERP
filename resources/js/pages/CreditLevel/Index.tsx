@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Textarea } from '@/components/ui/textarea';
+import { usePermission } from '@/hooks/usePermission';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, router, useForm } from '@inertiajs/react';
@@ -36,6 +37,7 @@ interface Props {
 }
 
 export default function CreditLevelsIndex({ creditlevel }: Props) {
+    const { hasPermission } = usePermission();
     const [isCreateOpen, setIsCreateOpen] = useState(false);
     const [editingCreditLimit, setEditingCreditLimit] = useState<CreditLimit | null>(null);
 
@@ -168,6 +170,7 @@ export default function CreditLevelsIndex({ creditlevel }: Props) {
                 <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
                     <div className="my-4 flex items-center justify-between">
                         <h1 className="text-2xl font-bold">Credit Limits Level Management</h1>
+                        {hasPermission('create_creditlevels') && (
                         <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
                             <DialogTrigger asChild>
                                 <Button className="flex items-center gap-2">
@@ -267,6 +270,7 @@ export default function CreditLevelsIndex({ creditlevel }: Props) {
                                 </form>
                             </DialogContent>
                         </Dialog>
+                        )}
                     </div>
 
                     <Card>
@@ -311,12 +315,16 @@ export default function CreditLevelsIndex({ creditlevel }: Props) {
 
                                                 <TableCell className="text-right">
                                                     <div className="flex justify-end gap-2">
-                                                        <Button variant="outline" size="icon" onClick={() => openEditDialog(creditlimit)}>
-                                                            <Pencil className="h-4 w-4" />
-                                                        </Button>
-                                                        <Button variant="outline" size="icon" onClick={() => handleDelete(creditlimit.id)}>
-                                                            <Trash2 className="h-4 w-4" />
-                                                        </Button>
+                                                        {hasPermission('update_creditlevels') && (
+                                                            <Button variant="outline" size="icon" onClick={() => openEditDialog(creditlimit)}>
+                                                                <Pencil className="h-4 w-4" />
+                                                            </Button>
+                                                        )}
+                                                        {hasPermission('delete_creditlevels') && (
+                                                            <Button variant="outline" size="icon" onClick={() => handleDelete(creditlimit.id)}>
+                                                                <Trash2 className="h-4 w-4" />
+                                                            </Button>
+                                                        )}
                                                     </div>
                                                 </TableCell>
                                             </TableRow>

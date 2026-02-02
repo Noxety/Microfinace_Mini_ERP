@@ -22,12 +22,18 @@ interface Department {
     name: string;
 }
 
+interface Branch {
+    id: number;
+    name: string;
+}
+
 interface Props {
     roles: Role[];
     departments: Department[];
+    branches: Branch[];
 }
 
-export default function UsersCreate({ roles, departments }: Props) {
+export default function UsersCreate({ roles, departments, branches }: Props) {
     console.log(departments);
 
     const breadcrumbs: BreadcrumbItem[] = [
@@ -47,6 +53,7 @@ export default function UsersCreate({ roles, departments }: Props) {
         password: '',
         password_confirmation: '',
         role_id: '',
+        branch_id: '',
         bio: '',
         // Employee fields
         employee_id: '',
@@ -172,6 +179,29 @@ export default function UsersCreate({ roles, departments }: Props) {
                                     </Select>
 
                                     <InputError message={errors.role_id} className="mt-1" />
+                                </div>
+
+                                <div className="grid gap-2">
+                                    <Label htmlFor="branch_id">Branch</Label>
+                                    <Select
+                                        value={data.branch_id ? String(data.branch_id) : undefined}
+                                        onValueChange={(value) => setData('branch_id', value)}
+                                        disabled={processing}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select a branch" />
+                                        </SelectTrigger>
+
+                                        <SelectContent>
+                                            {branches.map((branch) => (
+                                                <SelectItem key={branch.id} value={String(branch.id)}>
+                                                    {branch.name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+
+                                    <InputError message={errors.branch_id} className="mt-1" />
                                 </div>
 
                                 <div className="grid gap-2">

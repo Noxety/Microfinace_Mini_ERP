@@ -146,5 +146,8 @@ class DatabaseSeeder extends Seeder
             'salary' => 48000.00,
             'status' => 'active',
         ]);
+
+        // Seed all permissions and assign them to admin user (admin@gmail.com)
+        $this->call(PermissionSeeder::class);
     }
 }

@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
+            $table->integer('branch_id')->nullable();
             $table->string('password');
             $table->enum('role', ['member', 'user', 'admin'])->default('user');
             $table->enum('active', ['active', 'inactive'])->default('active');

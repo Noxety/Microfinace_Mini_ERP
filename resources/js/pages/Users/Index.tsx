@@ -8,7 +8,7 @@ import AppLayout from '@/layouts/app-layout';
 import { capitalizeFirst } from '@/lib/utils';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
-import { Pencil, Plus } from 'lucide-react';
+import { Eye, Pencil, Plus } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import OfflinePage from '../OfflinePage';
@@ -33,7 +33,6 @@ interface Props {
 }
 export default function UsersIndex({ users, userRole }: Props) {
     const { hasPermission } = usePermission();
-    console.log(hasPermission);
 
     const breadcrumbs: BreadcrumbItem[] = [
         {
@@ -133,15 +132,22 @@ export default function UsersIndex({ users, userRole }: Props) {
                                                 )}
                                             </TableCell>
                                             <TableCell className="text-right">
-                                                {hasPermission('update_user') && (
-                                                    <>
+                                                <div className="flex justify-end gap-2">
+                                                    {hasPermission('view_user') && (
+                                                        <Link href={route('users.show', user.id)}>
+                                                            <Button variant="outline" size="icon">
+                                                                <Eye className="h-4 w-4" />
+                                                            </Button>
+                                                        </Link>
+                                                    )}
+                                                    {hasPermission('update_user') && (
                                                         <Link href={route('users.edit', user.id)}>
                                                             <Button variant="outline" size="icon">
                                                                 <Pencil className="h-4 w-4" />
                                                             </Button>
                                                         </Link>
-                                                    </>
-                                                )}
+                                                    )}
+                                                </div>
                                             </TableCell>
                                         </TableRow>
                                     ))}

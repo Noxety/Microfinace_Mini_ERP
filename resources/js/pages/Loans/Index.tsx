@@ -2,6 +2,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { usePermission } from '@/hooks/usePermission';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { Head, Link } from '@inertiajs/react';
@@ -23,6 +24,7 @@ interface Loan {
 }
 
 export default function LoanIndex({ loans }: { loans: { data: Loan[] } }) {
+    const { hasPermission } = usePermission();
     const statusVariant = (status: string) => {
         switch (status) {
             case 'pending':
@@ -52,9 +54,11 @@ export default function LoanIndex({ loans }: { loans: { data: Loan[] } }) {
                 <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
                     <div className="mb-6 flex items-center justify-between">
                         <h1 className="text-2xl font-semibold">Loans</h1>
-                        <Button asChild>
-                            <Link href={route('loans.create')}>Create Loan</Link>
-                        </Button>
+                        {hasPermission('create_loans') && (
+                            <Button asChild>
+                                <Link href={route('loans.create')}>Create Loan</Link>
+                            </Button>
+                        )}
                     </div>
 
                     <Card>
@@ -91,11 +95,12 @@ export default function LoanIndex({ loans }: { loans: { data: Loan[] } }) {
                                             </TableCell>
                                             <TableCell>{new Date(loan.created_at).toLocaleDateString()}</TableCell>
                                             <TableCell className="space-x-2 text-right">
-                                                <Button size="sm" variant="outline" asChild>
-                                                    <Link href={route('loans.show', loan.id)}>View</Link>
-                                                </Button>
-
-                                                {loan.status === 'pending' && (
+                                                {hasPermission('view_loans') && (
+                                                    <Button size="sm" variant="outline" asChild>
+                                                        <Link href={route('loans.show', loan.id)}>View</Link>
+                                                    </Button>
+                                                )}
+                                                {hasPermission('update_loans') && loan.status === 'pending' && (
                                                     <Button size="sm" asChild>
                                                         <Link href={route('loans.approve', loan.id)}>Approve</Link>
                                                     </Button>

@@ -5,6 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { usePermission } from '@/hooks/usePermission';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, router, useForm } from '@inertiajs/react';
@@ -28,9 +29,9 @@ interface Props {
 }
 
 export default function CurrencyIndex({ currencies }: Props) {
+    const { hasPermission } = usePermission();
     const [isCreateOpen, setIsCreateOpen] = useState(false);
     const [editing, setEditing] = useState<Currency | null>(null);
-    console.log(currencies);
 
     const breadcrumbs: BreadcrumbItem[] = [{ title: 'Currencies', href: '/currencies' }];
 
@@ -114,6 +115,7 @@ export default function CurrencyIndex({ currencies }: Props) {
                 <div className="flex justify-between">
                     <h1 className="text-2xl font-bold">Currencies</h1>
 
+                    {hasPermission('create_currencies') && (
                     <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
                         <DialogTrigger asChild>
                             <Button>
@@ -161,6 +163,7 @@ export default function CurrencyIndex({ currencies }: Props) {
                             </form>
                         </DialogContent>
                     </Dialog>
+                    )}
                 </div>
 
                 <Card>
@@ -191,13 +194,16 @@ export default function CurrencyIndex({ currencies }: Props) {
                                         </TableCell>
 
                                         <TableCell className="text-right">
-                                            <Button size="icon" variant="outline" onClick={() => openEdit(c)}>
-                                                <Pencil className="h-4 w-4" />
-                                            </Button>
-
-                                            <Button size="icon" variant="outline" onClick={() => handleDelete(c.id)}>
-                                                <Trash2 className="h-4 w-4" />
-                                            </Button>
+                                            {hasPermission('update_currencies') && (
+                                                <Button size="icon" variant="outline" onClick={() => openEdit(c)}>
+                                                    <Pencil className="h-4 w-4" />
+                                                </Button>
+                                            )}
+                                            {hasPermission('delete_currencies') && (
+                                                <Button size="icon" variant="outline" onClick={() => handleDelete(c.id)}>
+                                                    <Trash2 className="h-4 w-4" />
+                                                </Button>
+                                            )}
                                         </TableCell>
                                     </TableRow>
                                 ))}
