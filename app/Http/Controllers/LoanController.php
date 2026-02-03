@@ -8,6 +8,7 @@ use App\Models\Loan;
 use App\Models\LoanSchedule;
 use App\Models\LoanTransaction;
 use App\Models\Repayment;
+use App\Services\CashBalanceService;
 use App\Services\LoanScheduleService;
 use App\Services\PenaltyService;
 use Carbon\Carbon;
@@ -143,6 +144,13 @@ class LoanController extends Controller
     }
     public function disburse(Request $request, Loan $loan)
     {
+        $balance = CashBalanceService::branchBalance($loan->branch_id);
+        if ($balance < $loan->principal_amount) {
+            throw ValidationException::withMessages([
+                'amount' => 'Insufficient branch cash balance for disbursement.',
+            ]);
+        }
+
         if ($loan->status !== 'approved') {
             throw ValidationException::withMessages([
                 'loan' => 'Only approved loans can be disbursed.',

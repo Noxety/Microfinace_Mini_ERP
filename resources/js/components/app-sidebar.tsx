@@ -12,7 +12,6 @@ export function AppSidebar() {
     const page = usePage();
     const user = page.props.auth.user;
     const { hasPermission, hasAny } = usePermission();
-    console.log(user);
     const mainNavItems: NavItem[] = [
         {
             title: 'Dashboard',

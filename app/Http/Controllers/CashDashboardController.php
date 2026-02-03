@@ -6,6 +6,7 @@ use App\Models\Branch;
 use App\Models\CashLedger;
 use App\Models\Loan;
 use App\Models\LoanSchedule;
+use App\Services\CashBalanceService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
@@ -23,13 +24,15 @@ class CashDashboardController extends Controller
     {
         $user = auth()->user();
         $canViewAllBranches = $this->canViewAllBranches();
-
+        $branchBalance = null;
         if ($canViewAllBranches) {
             $branchId = $request->filled('branch_id') ? (int) $request->branch_id : null;
         } else {
             $branchId = $user->branch_id;
         }
-
+        if ($request->branch_id) {
+            $branchBalance = CashBalanceService::branchBalance($branchId);
+        }
         $forecast = LoanSchedule::query()
             ->whereHas('loan', function ($q) use ($branchId) {
                 $q->where('status', 'disbursed')
@@ -65,7 +68,7 @@ class CashDashboardController extends Controller
 
         $bucketOrder = ['1-30' => '1–30 days', '31-60' => '31–60 days', '60+' => '60+ days'];
         $buckets = collect($bucketOrder)
-            ->map(fn ($label, $key) => [
+            ->map(fn($label, $key) => [
                 'bucket' => $label,
                 'bucket_key' => $key,
                 'amount' => $bucketsRaw->get($key) ? (float) $bucketsRaw->get($key)->amount : 0,
@@ -105,6 +108,7 @@ class CashDashboardController extends Controller
             'expected_outflow' => $expected_outflow,
             'active_loans_count' => $activeLoansCount,
             'approved_pending_count' => $approvedPendingCount,
+            'branch_balance' => $branchBalance,
         ]);
     }
 
@@ -166,5 +170,59 @@ class CashDashboardController extends Controller
                 'balance' => ($totals->total_inflow ?? 0) - ($totals->total_outflow ?? 0),
             ],
         ]);
+    }
+    public function storeIncome(Request $request)
+    {
+        $data = $request->validate([
+            'branch_id'        => ['required', 'exists:branches,id'],
+            'amount'           => ['required', 'numeric', 'min:1'],
+            'description'      => ['required', 'string'],
+            'transaction_date' => ['required', 'date'],
+        ]);
+
+        DB::transaction(function () use ($data) {
+            $branch = Branch::where('id', $data['branch_id'])
+                ->lockForUpdate()
+                ->firstOrFail();
+            CashLedger::create([
+                'branch_id'        => $branch->id,
+                'type'             => 'inflow',
+                'amount'           => $data['amount'],
+                'description'      => $data['description'],
+                'transaction_date' => $data['transaction_date'],
+                'created_by'       => auth()->id(),
+            ]);
+        });
+
+        return redirect()
+            ->back()
+            ->with('success', 'Income recorded successfully.');
+    }
+    public function storeOutcome(Request $request)
+    {
+        $data = $request->validate([
+            'branch_id'        => ['required', 'exists:branches,id'],
+            'amount'           => ['required', 'numeric', 'min:1'],
+            'description'      => ['required', 'string'],
+            'transaction_date' => ['required', 'date'],
+        ]);
+
+        DB::transaction(function () use ($data) {
+            $branch = Branch::where('id', $data['branch_id'])
+                ->lockForUpdate()
+                ->firstOrFail();
+            CashLedger::create([
+                'branch_id'        => $branch->id,
+                'type'             => 'outflow',
+                'amount'           => $data['amount'],
+                'description'      => $data['description'],
+                'transaction_date' => $data['transaction_date'],
+                'created_by'       => auth()->id(),
+            ]);
+        });
+
+        return redirect()
+            ->back()
+            ->with('success', 'Income recorded successfully.');
     }
 }

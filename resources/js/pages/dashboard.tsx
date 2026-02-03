@@ -5,6 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
 import { Head, router } from '@inertiajs/react';
+import { AlertTriangle, TrendingUp } from 'lucide-react';
 import { useState } from 'react';
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 
@@ -19,6 +20,7 @@ interface Props {
     expected_outflow: number;
     active_loans_count: number;
     approved_pending_count: number;
+    branch_balance: number;
 }
 
 function formatPeriod(period: string): string {
@@ -39,7 +41,41 @@ export default function Dashboard({
     expected_outflow,
     active_loans_count = 0,
     approved_pending_count = 0,
+    branch_balance,
 }: Props) {
+    const lowThreshold = 1_000_000
+
+    const status = branch_balance < 0
+        ? 'danger'
+        : branch_balance < lowThreshold
+            ? 'warning'
+            : 'healthy'
+
+    const meta = {
+        healthy: {
+            label: 'Healthy',
+            color: 'text-emerald-600',
+            bg: 'bg-emerald-50 dark:bg-emerald-950/20',
+            icon: TrendingUp,
+            badge: 'secondary',
+        },
+        warning: {
+            label: 'Low Balance',
+            color: 'text-yellow-600',
+            bg: 'bg-yellow-50 dark:bg-yellow-950/20',
+            icon: AlertTriangle,
+            badge: 'outline',
+        },
+        danger: {
+            label: 'Negative Balance',
+            color: 'text-red-600',
+            bg: 'bg-red-50 dark:bg-red-950/20',
+            icon: AlertTriangle,
+            badge: 'destructive',
+        },
+    }[status]
+
+    const Icon = meta.icon
     const [branchId, setBranchId] = useState<number | null>(selectedBranch);
 
     const totalForecast = forecast.reduce((sum, row) => sum + Number(row.expected_amount), 0);
@@ -59,7 +95,6 @@ export default function Dashboard({
         month: formatPeriod(row.period),
         amount: Number(row.expected_amount),
     }));
-
     return (
         <AppLayout breadcrumbs={[]}>
             <Head title="Finance Dashboard" />
@@ -250,9 +285,31 @@ export default function Dashboard({
                             </CardContent>
                         </Card>
                     </div>
-
-                    {/* Cash Projection sidebar */}
                     <div className="space-y-6">
+                        {branch_balance !== null && (
+                            <>
+                                <Card className={` ${meta.bg}`}>
+                                    <CardHeader className="flex flex-row items-center justify-between">
+                                        <CardTitle className="text-sm font-medium">Branch Cash Balance</CardTitle>
+                                        <Badge variant={meta.badge as any}>{meta.label}</Badge>
+                                    </CardHeader>
+                                    <CardContent className="space-y-2">
+                                        <div className="flex items-center gap-3">
+                                            <div className={`rounded-full p-2 ${meta.bg}`}>
+                                                <Icon className={`h-5 w-5 ${meta.color}`} />
+                                            </div>
+                                            <p className={`text-xl font-bold ${meta.color}`}>
+                                                {branch_balance?.toLocaleString()} MMK
+                                            </p>
+                                        </div>
+
+                                        <p className="text-xs text-muted-foreground">
+                                            Calculated from cash ledger inflows and outflows
+                                        </p>
+                                    </CardContent>
+                                </Card>
+                            </>
+                        )}
                         <Card>
                             <CardHeader className="flex items-center justify-between pb-2">
                                 <CardTitle className="text-base">Cash Projection</CardTitle>

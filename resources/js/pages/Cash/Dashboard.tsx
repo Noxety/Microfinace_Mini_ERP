@@ -9,6 +9,10 @@ import { BreadcrumbItem } from '@/types';
 import { Head, router, usePage } from '@inertiajs/react';
 import dayjs from 'dayjs';
 import { ArrowDownToLine, ArrowUpFromLine, Wallet } from 'lucide-react';
+import CreateIncomeFlow from './components/CreateIncomeFlow';
+import { Dialog, DialogDescription, DialogTitle, DialogHeader, DialogContent, DialogTrigger } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import CreateOutcomeFlow from './components/CreateOutcomeFlow';
 
 export default function CashDashboard() {
     const { ledgers, canViewAllBranches = false, branches, filters, totals } = usePage().props as any;
@@ -39,7 +43,7 @@ export default function CashDashboard() {
                 </div>
 
                 {/* Summary cards */}
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
                     <Card className="border-emerald-200/50 bg-emerald-50/30 dark:border-emerald-900/30 dark:bg-emerald-950/20">
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
                             <CardTitle className="text-sm font-medium text-emerald-800 dark:text-emerald-200">Total Inflow</CardTitle>
@@ -69,7 +73,28 @@ export default function CashDashboard() {
                             </p>
                         </CardContent>
                     </Card>
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between pb-2">
+                            <CardTitle className="text-sm font-medium text-muted-foreground">CashBook Adjustment</CardTitle>
+                            <Wallet className="h-4 w-4 text-muted-foreground" />
+                        </CardHeader>
+                        <CardContent className='justify-between flex gap-2'>
+                            <Dialog>
+                                <DialogTrigger > <Button variant="outline">Inflow</Button></DialogTrigger>
+                                <DialogContent >
+                                    <CreateIncomeFlow branches={branches} />
+                                </DialogContent>
+                            </Dialog>
+                            <Dialog>
+                                <DialogTrigger > <Button variant="outline">OutFlow</Button></DialogTrigger>
+                                <DialogContent >
+                                    <CreateOutcomeFlow branches={branches} />
+                                </DialogContent>
+                            </Dialog>
+                        </CardContent>
+                    </Card>
                 </div>
+
 
                 {/* Filters */}
                 <Card>

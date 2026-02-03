@@ -6,6 +6,7 @@ import AppLayout from '@/layouts/app-layout';
 import { Head, router } from '@inertiajs/react';
 import DisburseLoanDialog from './components/DisburseLoanDialog';
 import PayInstallmentDialog from './components/PayInstallmentDialog';
+import { BreadcrumbItem } from '@/types';
 
 export default function LoanShow({ loan }) {
     const statusColor =

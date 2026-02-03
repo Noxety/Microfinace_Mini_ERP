@@ -37,19 +37,15 @@ Route::get('auth/google', [SocialLoginController::class, 'redirectToGoogle'])->n
 Route::get('auth/google/callback', [SocialLoginController::class, 'handleGoogleCallback']);
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::middleware(['auth'])->get('/api/rooms/{roomId}/messages', [ChatController::class, 'messages'])->name('chat.messages');
-    Route::get('/rooms/{roomId}', [ChatController::class, 'show'])
-        ->name('rooms.show');
-    Route::post('/chat/send', [ChatController::class, 'send'])->name('chat.send');
-    Route::get('dashboard',  [CashDashboardController::class , 'dashboard'])->name('dashboard');
+    Route::get('dashboard',  [CashDashboardController::class, 'dashboard'])->name('dashboard');
     Route::middleware([AdminOnly::class])->group(function () {
         Route::get('cash-dashboard', [CashDashboardController::class, 'index'])->name('cash.dashboard');
-        Route::post('loans/approve', [LoanController::class, 'approve'])->name('loans.approve');
-        Route::post('loans/disburse', [LoanController::class, 'disburse'])->name('loans.disburse');
         Route::post('loans/preview', [LoanController::class, 'preview'])->name('loans.preview');
         Route::get('loans/{loan}/approve', [LoanController::class, 'approve'])->name('loans.approve');
         Route::post('loans/{loan}/disburse', [LoanController::class, 'disburse'])->name('loans.disburse');
         Route::post('repayments/{loanSchedule}', [LoanController::class, 'repayments'])->name('loans.repayments');
+        Route::post('cash-ledgers/income', [CashDashboardController::class, 'storeIncome'])->name('cash-ledgers.income.store');
+        Route::post('cash-ledgers/outcome', [CashDashboardController::class, 'storeOutcome'])->name('cash-ledgers.outcome.store');
         Route::resource('users', UserController::class);
         Route::resource('roles', RoleController::class);
         Route::resource('permissions', PermissionController::class);
