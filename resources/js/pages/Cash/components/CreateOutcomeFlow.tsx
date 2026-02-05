@@ -104,7 +104,7 @@ export default function CreateOutcomeFlow({ branches }: Props) {
                     </div>
 
                     <Button type="submit" disabled={processing}>
-                        Save OutFlow
+                        {processing ? 'Saving...' : 'Save OutFlow'}
                     </Button>
                 </form>
             </CardContent>

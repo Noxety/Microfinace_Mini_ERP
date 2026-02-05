@@ -104,7 +104,7 @@ export default function CreateIncomeFlow({ branches }: Props) {
                     </div>
 
                     <Button type="submit" disabled={processing}>
-                        Save Income
+                        {processing ? 'Saving...' : 'Save Income'}
                     </Button>
                 </form>
             </CardContent>

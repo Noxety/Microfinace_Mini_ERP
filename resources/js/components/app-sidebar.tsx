@@ -5,7 +5,7 @@ import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavGroup, type NavItem } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { CableIcon, Coins, CoinsIcon, CreditCard, Key, LayoutGrid, LocateIcon, Settings, Shield, StoreIcon, User2, UserCircle, Users } from 'lucide-react';
+import { CableIcon, Coins, CoinsIcon, CreditCard, Key, LayoutGrid, LocateIcon, Settings, Shield, StoreIcon, User, User2, UserCircle, Users } from 'lucide-react';
 import AppLogo from './app-logo';
 
 export function AppSidebar() {
@@ -22,6 +22,11 @@ export function AppSidebar() {
             title: 'Loan Cash Dashboard',
             href: '/cash-dashboard',
             icon: CoinsIcon,
+        },
+        {
+            title: 'User Dashboard',
+            href: '/employee-dashboard',
+            icon: Users,
         },
     ];
 
@@ -52,7 +57,7 @@ export function AppSidebar() {
     const hasCustomerPermission = hasAny(['view_creditlevels', 'view_customers', 'view_loans']);
     const hasAdminPermission = hasAny(['view_users', 'view_roles', 'view_permissions']);
 
-    if ( hasMasterPermission) {
+    if (hasMasterPermission) {
         if (masterNavItems.length > 0) {
             navGroups.push({
                 title: 'Master Setup',
@@ -61,7 +66,7 @@ export function AppSidebar() {
             });
         }
     }
-    if ( hasCustomerPermission) {
+    if (hasCustomerPermission) {
         if (customerNavItems.length > 0) {
             navGroups.push({
                 title: 'Customers Setup',
@@ -70,7 +75,7 @@ export function AppSidebar() {
             });
         }
     }
-    if ( hasAdminPermission) {
+    if (hasAdminPermission) {
         if (adminNavItems.length > 0) {
             navGroups.push({
                 title: 'Administration',

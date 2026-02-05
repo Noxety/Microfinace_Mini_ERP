@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Branch;
 use App\Models\CashLedger;
+use App\Models\Employee;
 use App\Models\Loan;
 use App\Models\LoanSchedule;
 use App\Services\CashBalanceService;
@@ -224,5 +225,70 @@ class CashDashboardController extends Controller
         return redirect()
             ->back()
             ->with('success', 'Income recorded successfully.');
+    }
+    public function employeeDashboard()
+    {
+        $month = now()->month;
+
+        $employees = Employee::whereHas('user', fn($q) => $q->where('role', '!=', 'admin'))
+            ->with(['user.branch', 'department'])
+            ->get()
+            ->map(function ($e) use ($month) {
+
+                // Monthly loan volume handled by officer
+                $loanAmount = Loan::where('created_by', $e->user_id)
+                    ->whereMonth('created_at', $month)
+                    ->sum('principal_amount');
+
+                // 1% bonus
+                $bonus = round($loanAmount * 0.01, 2);
+
+                return [
+                    'id' => $e->id,
+
+                    // User info
+                    'name' => $e->user?->name,
+                    'email' => $e->user?->email,
+
+                    // Relations
+                    'department' => $e->department?->name,
+                    'branch' => $e->user?->branch?->name,
+
+                    // Finance
+                    'salary' => $e->salary ?? 0,
+                    'loan_volume' => $loanAmount,
+                    'bonus' => $bonus,
+                    'total' => ($e->salary ?? 0) + $bonus,
+                ];
+            })
+
+            // 🔥 Rank by LOAN VOLUME
+            ->sortByDesc('loan_volume')
+            ->values()
+
+            // Assign medals
+            ->map(function ($e, $index) {
+
+                $e['rank'] = match ($index) {
+                    0 => 'gold',
+                    1 => 'silver',
+                    2 => 'bronze',
+                    default => null,
+                };
+
+                return $e;
+            });
+
+        // Chart uses same ranking order
+        $chart = $employees->map(fn($e) => [
+            'name' => $e['name'],
+            'loan_volume' => $e['loan_volume'],
+        ]);
+
+        return Inertia::render('Employee/Dashboard', [
+            'employees' => $employees,
+            'chart' => $chart,
+            'month' => now()->format('F Y'),
+        ]);
     }
 }

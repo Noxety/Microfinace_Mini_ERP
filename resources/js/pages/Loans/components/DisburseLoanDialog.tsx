@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { useState } from 'react'
+import { toast } from 'sonner'
 
 interface Props {
     loan: any
@@ -31,6 +32,7 @@ export default function DisburseLoanDialog({ loan }: Props) {
     function submit() {
         post(route('loans.disburse', loan.id), {
             onSuccess: () => setOpen(false),
+            onError: (e) => { toast.error(e.amount); console.error(e) },
         })
     }
 

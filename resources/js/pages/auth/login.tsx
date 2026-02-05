@@ -151,9 +151,17 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                                     </div>
                                 </div>
                                 <div className="bg-muted relative hidden md:block ">
-                                    <div className='flex h-full w-full flex-col items-center justify-center'>
-                                        <img src="./favicon.ico" alt="Unity Microfinance" className='w-full h-full'/>
-                                    </div>
+                                    <Cubes
+                                        gridSize={8}
+                                        maxAngle={45}
+                                        radius={3}
+                                        borderStyle="3px solid #fff"
+                                        faceColor="#1a1a2e"
+                                        rippleColor="#ff6b6b"
+                                        rippleSpeed={1.5}
+                                        autoAnimate
+                                        rippleOnClick
+                                    />  
                                 </div>
                             </CardContent>
                         </Card>

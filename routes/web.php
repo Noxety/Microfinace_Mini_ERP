@@ -40,10 +40,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard',  [CashDashboardController::class, 'dashboard'])->name('dashboard');
     Route::middleware([AdminOnly::class])->group(function () {
         Route::get('cash-dashboard', [CashDashboardController::class, 'index'])->name('cash.dashboard');
+        Route::get('employee-dashboard', [CashDashboardController::class, 'employeeDashboard'])->name('cash.employeeDashboard');
+
         Route::post('loans/preview', [LoanController::class, 'preview'])->name('loans.preview');
         Route::get('loans/{loan}/approve', [LoanController::class, 'approve'])->name('loans.approve');
         Route::post('loans/{loan}/disburse', [LoanController::class, 'disburse'])->name('loans.disburse');
         Route::post('repayments/{loanSchedule}', [LoanController::class, 'repayments'])->name('loans.repayments');
+        Route::get('loans/{loan}/voucher', [LoanController::class, 'voucher'])->name('loans.voucher');
         Route::post('cash-ledgers/income', [CashDashboardController::class, 'storeIncome'])->name('cash-ledgers.income.store');
         Route::post('cash-ledgers/outcome', [CashDashboardController::class, 'storeOutcome'])->name('cash-ledgers.outcome.store');
         Route::resource('users', UserController::class);

@@ -107,7 +107,7 @@ class LoanController extends Controller
             }
         });
 
-        return redirect()->route('loans.create')
+        return redirect()->route('loans.index')
             ->with('success', 'Loan application submitted');
     }
     public function show(string $id)
@@ -288,5 +288,13 @@ class LoanController extends Controller
         });
 
         return back()->with('success', 'Repayment recorded successfully.');
+    }
+    public function voucher(Loan $loan)
+    {
+        $loan->load(['customer', 'branch', 'schedules']);
+
+        return Inertia::render('Loans/Voucher', [
+            'loan' => $loan
+        ]);
     }
 }

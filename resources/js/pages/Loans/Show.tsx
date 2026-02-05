@@ -31,99 +31,187 @@ export default function LoanShow({ loan }) {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Loans Detail" />
-            <div className="space-y-6 p-4">
-                {/* Loan Summary */}
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between">
-                        <CardTitle>Loan Summary</CardTitle>
-                        <Badge variant={statusColor}>{loan.status}</Badge>
-                    </CardHeader>
-                    <CardContent className="grid grid-cols-2 gap-4 text-sm md:grid-cols-4">
-                        <div>
-                            <p className="text-muted-foreground">Loan No</p>
-                            <p className="font-medium">{loan.loan_no}</p>
-                        </div>
-                        <div>
-                            <p className="text-muted-foreground">Customer</p>
-                            <p className="font-medium">{loan.customer.name}</p>
-                        </div>
-                        <div>
-                            <p className="text-muted-foreground">Branch</p>
-                            <p className="font-medium">{loan.branch?.name}</p>
-                        </div>
-                        <div>
-                            <p className="text-muted-foreground">Principal</p>
-                            <p className="font-medium">{loan.principal_amount}</p>
-                        </div>
-                        <div>
-                            <p className="text-muted-foreground">Interest Rate</p>
-                            <p className="font-medium">{loan.interest_rate}%</p>
-                        </div>
-                        <div>
-                            <p className="text-muted-foreground">Term</p>
-                            <p className="font-medium">{loan.term} months</p>
-                        </div>
-                        <div>
-                            <p className="text-muted-foreground">Start Date</p>
-                            <p className="font-medium">{loan.start_date}</p>
-                        </div>
-                        <div>
-                            <p className="text-muted-foreground">Created By</p>
-                            <p className="font-medium">{loan.creator?.name}</p>
-                        </div>
-                    </CardContent>
-                </Card>
 
-                {/* Actions */}
-                {loan.status === 'pending' && (
-                    <div className="flex gap-2 justify-end">
-                        <Button onClick={() => router.get(route('loans.approve', loan.id))}>Approve Loan</Button>
+            <div className="space-y-6 p-6">
+                <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                    <div>
+                        <h1 className="text-2xl font-semibold tracking-tight">Loan details</h1>
+                        <p className="text-sm text-muted-foreground">
+                            Overview, status and repayment schedule
+                        </p>
                     </div>
-                )}
-                {loan.status === 'approved' && <DisburseLoanDialog loan={loan} />}
-                {loan.status === 'disbursed' && <span className="text-muted-foreground text-sm">Disbursed on {loan.disbursed_at}</span>}
-                {/* Repayment Schedule */}
-                <Card>
+
+                    <div className="flex flex-wrap items-center gap-2">
+                        <Badge variant={statusColor} className="text-xs">
+                            {loan.status}
+                        </Badge>
+
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => window.open(route('loans.voucher', loan.id), '_blank')}
+                        >
+                            Print voucher
+                        </Button>
+
+                        {loan.status === 'pending' && (
+                            <Button
+                                size="sm"
+                                onClick={() => router.get(route('loans.approve', loan.id))}
+                            >
+                                Approve loan
+                            </Button>
+                        )}
+
+                        {loan.status === 'approved' && (
+                            <DisburseLoanDialog loan={loan} />
+                        )}
+
+                        {loan.status === 'disbursed' && (
+                            <span className="text-xs text-muted-foreground">
+                                Disbursed on {loan.disbursed_at}
+                            </span>
+                        )}
+                    </div>
+                </div>
+
+                {/* Content layout */}
+                <div className="grid gap-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
+                    {/* Loan summary */}
+                    <Card className="border bg-card">
+                        <CardHeader className="pb-3">
+                            <CardTitle className="text-sm font-medium">Loan summary</CardTitle>
+                        </CardHeader>
+                        <CardContent className="grid grid-cols-1 gap-4 text-sm md:grid-cols-2">
+                            <div>
+                                <p className="text-xs text-muted-foreground">Loan no.</p>
+                                <p className="font-medium">{loan.loan_no}</p>
+                            </div>
+                            <div>
+                                <p className="text-xs text-muted-foreground">Customer</p>
+                                <p className="font-medium">{loan.customer.name}</p>
+                            </div>
+                            <div>
+                                <p className="text-xs text-muted-foreground">Branch</p>
+                                <p className="font-medium">{loan.branch?.name ?? '-'}</p>
+                            </div>
+                            <div>
+                                <p className="text-xs text-muted-foreground">Principal</p>
+                                <p className="font-medium">
+                                    {Number(loan.principal_amount).toLocaleString()} MMK
+                                </p>
+                            </div>
+                            <div>
+                                <p className="text-xs text-muted-foreground">Interest rate</p>
+                                <p className="font-medium">{loan.interest_rate}%</p>
+                            </div>
+                            <div>
+                                <p className="text-xs text-muted-foreground">Term</p>
+                                <p className="font-medium">{loan.term} months</p>
+                            </div>
+                            <div>
+                                <p className="text-xs text-muted-foreground">Start date</p>
+                                <p className="font-medium">{loan.start_date}</p>
+                            </div>
+                            <div>
+                                <p className="text-xs text-muted-foreground">Created by</p>
+                                <p className="font-medium">{loan.creator?.name}</p>
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    {/* Status / quick info */}
+                    <Card className="border bg-card">
+                        <CardHeader className="pb-3">
+                            <CardTitle className="text-sm font-medium">Status & info</CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-3 text-sm">
+                            <div className="flex items-center justify-between">
+                                <span className="text-xs text-muted-foreground">Current status</span>
+                                <Badge variant={statusColor} className="text-xs">
+                                    {loan.status}
+                                </Badge>
+                            </div>
+                            {loan.status === 'disbursed' && (
+                                <div className="flex items-center justify-between">
+                                    <span className="text-xs text-muted-foreground">Disbursed on</span>
+                                    <span className="font-medium text-xs">{loan.disbursed_at}</span>
+                                </div>
+                            )}
+                            {/* You can add total paid / outstanding here later */}
+                        </CardContent>
+                    </Card>
+                </div>
+
+                {/* Repayment schedule */}
+                <Card className="border bg-card">
                     <CardHeader>
-                        <CardTitle>Repayment Schedule</CardTitle>
+                        <CardTitle className="text-sm font-medium">Repayment schedule</CardTitle>
                     </CardHeader>
-                    <CardContent>
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>#</TableHead>
-                                    <TableHead>Due Date</TableHead>
-                                    <TableHead>Total</TableHead>
-                                    <TableHead>Paid</TableHead>
-                                    <TableHead>Status</TableHead>
-                                    <TableHead></TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {loan.schedules.map((s: any) => (
-                                    <TableRow key={s.id}>
-                                        <TableCell>{s.installment_no}</TableCell>
-                                        <TableCell>{s.due_date}</TableCell>
-                                        <TableCell>{s.total_due.toLocaleString()}</TableCell>
-                                        <TableCell>{s.paid_amount.toLocaleString()}</TableCell>
-                                        <TableCell>
-                                            <Badge variant={s.status === 'paid' ? 'success' : s.status === 'overdue' ? 'destructive' : 'secondary'}>
-                                                {s.status} {s.overdue_days > 0 && <Badge variant="destructive">{s.overdue_days} days overdue</Badge>}{' '}
-                                                {s.penalty_amount > 0 && (
-                                                    <p className="text-xs text-red-600">Penalty: {s.penalty_amount.toLocaleString()} MMK</p>
-                                                )}
-                                            </Badge>
-                                        </TableCell>
-                                        <TableCell>
-                                            {loan.status === 'disbursed' && s.status !== 'paid' && <PayInstallmentDialog schedule={s} />}
-                                        </TableCell>
+                    <CardContent className="pt-0">
+                        <div className="rounded-lg border overflow-hidden">
+                            <Table>
+                                <TableHeader>
+                                    <TableRow className="bg-muted/40">
+                                        <TableHead className="w-10 text-xs">#</TableHead>
+                                        <TableHead className="text-xs">Due date</TableHead>
+                                        <TableHead className="text-right text-xs">Total (MMK)</TableHead>
+                                        <TableHead className="text-right text-xs">Paid (MMK)</TableHead>
+                                        <TableHead className="text-xs">Status</TableHead>
+                                        <TableHead className="w-24 text-right text-xs">Action</TableHead>
                                     </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
+                                </TableHeader>
+                                <TableBody>
+                                    {loan.schedules.map((s: any) => {
+                                        const statusVariant =
+                                            s.status === 'paid'
+                                                ? 'success'
+                                                : s.status === 'overdue'
+                                                    ? 'destructive'
+                                                    : 'secondary'
+
+                                        return (
+                                            <TableRow key={s.id} className="hover:bg-muted/30">
+                                                <TableCell className="text-xs">{s.installment_no}</TableCell>
+                                                <TableCell className="text-xs">{s.due_date}</TableCell>
+                                                <TableCell className="text-right text-xs font-mono">
+                                                    {Number(s.total_due).toLocaleString()}
+                                                </TableCell>
+                                                <TableCell className="text-right text-xs font-mono">
+                                                    {Number(s.paid_amount).toLocaleString()}
+                                                </TableCell>
+                                                <TableCell className="text-xs">
+                                                    <div className="flex flex-col gap-1">
+                                                        <Badge variant={statusVariant} className="w-fit text-[11px]">
+                                                            {s.status}
+                                                        </Badge>
+                                                        {s.overdue_days > 0 && (
+                                                            <span className="text-[11px] text-red-600">
+                                                                {s.overdue_days} days overdue
+                                                            </span>
+                                                        )}
+                                                        {s.penalty_amount > 0 && (
+                                                            <span className="text-[11px] text-red-600">
+                                                                Penalty: {s.penalty_amount.toLocaleString()} MMK
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                </TableCell>
+                                                <TableCell className="text-right text-xs">
+                                                    {loan.status === 'disbursed' && s.status !== 'paid' && (
+                                                        <PayInstallmentDialog schedule={s} />
+                                                    )}
+                                                </TableCell>
+                                            </TableRow>
+                                        )
+                                    })}
+                                </TableBody>
+                            </Table>
+                        </div>
                     </CardContent>
                 </Card>
             </div>
         </AppLayout>
+
     );
 }

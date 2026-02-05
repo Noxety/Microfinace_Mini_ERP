@@ -6,6 +6,15 @@
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 
 @custom-variant dark (&:is(.dark *));
+@media print {
+  body {
+      background: white;
+  }
+
+  .print\:hidden {
+      display: none;
+  }
+}
 
 @theme {
     --font-sans:
