@@ -1,39 +1,20 @@
-const CACHE_NAME = "pwa-cache-v1";
-const OFFLINE_URL = "/offline";
-
-const STATIC_ASSETS = [
+const CACHE_NAME = "unity-erp-cache-v1";
+const urlsToCache = [
   "/",
-  "/offline",
-  "/manifest.json",
-  "/css/app.css",
-  "/js/app.js"
+  "/index.html",
+  "/favicon.ico",
+  "/icons/icon-192.png",
+  "/icons/icon-512.png"
 ];
 
-// Install
-self.addEventListener("install", event => {
+self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(STATIC_ASSETS))
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(urlsToCache))
   );
 });
 
-// Activate
-self.addEventListener("activate", event => {
-  event.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(
-        keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key))
-      )
-    )
+self.addEventListener("fetch", (event) => {
+  event.respondWith(
+    caches.match(event.request).then((response) => response || fetch(event.request))
   );
-});
-
-// Fetch
-self.addEventListener("fetch", event => {
-  if (!navigator.onLine) {
-    event.respondWith(
-      caches.match(event.request).then(response => {
-        return response || caches.match(OFFLINE_URL);
-      })
-    );
-  }
 });
