@@ -162,23 +162,21 @@ export default function CustomersEdit({ customer, branches, creditlevel }: Props
             }
         }
     }, []);
-
     useEffect(() => {
-        // Extract values from existedNRC if present
-        if (data.nrc) {
-            const match = data.nrc.match(/^(\d+)\/(\w+)\((\w+)\)(\d+)$/);
-            if (match) {
-                if (NRCCodeSelect !== match[1]) setNRCCodeSelect(match[1]);
-                if (NRCPlaceSelect !== match[2]) setNRCPlaceSelect(match[2]);
-                if (NRCTypeSelect !== match[3]) setNRCTypeSelect(match[3]);
-                if (NRCCode !== match[4]) setNRCCode(match[4]);
+        if (NRCCodeSelect && NRCPlaceSelect && NRCTypeSelect && NRCCode) {
+            const full = `${NRCCodeSelect}/${NRCPlaceSelect}(${NRCTypeSelect})${NRCCode}`;
+
+            if (data.nrc !== full) {
+                setData('nrc', full);
             }
         }
-    }, [data.nrc]);
+    }, [NRCCodeSelect, NRCPlaceSelect, NRCTypeSelect, NRCCode]);
 
     const handleNRCFormUpdate = (nrcData: any) => {
         setData('nrc', nrcData);
     };
+    // console.log("hi");
+
     return (
         <>
             <AppLayout breadcrumbs={breadcrumbs}>

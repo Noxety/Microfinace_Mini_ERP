@@ -37,13 +37,13 @@ export function AppSidebar() {
     ].filter((item) => hasPermission((item as NavItem & { permission: string }).permission)) as NavItem[];
 
     const customerNavItems: NavItem[] = [
-        { title: 'Credit Limits', href: '/creditlevels', icon: Coins, permission: 'view_creditlevels' },
         { title: 'Customers', href: '/customers', icon: UserCircle, permission: 'view_customers' },
         { title: 'Loans', href: '/loans', icon: CreditCard, permission: 'view_loans' },
     ].filter((item) => hasPermission((item as NavItem & { permission: string }).permission)) as NavItem[];
 
     const masterNavItems: NavItem[] = [
         { title: 'Currency', href: '/currencies', icon: Coins, permission: 'view_currencies' },
+        { title: 'Credit Limits', href: '/creditlevels', icon: Coins, permission: 'view_creditlevels' },
         { title: 'Departments', href: '/departments', icon: CableIcon, permission: 'view_departments' },
         { title: 'Locations', href: '/locations', icon: LocateIcon, permission: 'view_locations' },
         { title: 'Branches', href: '/branches', icon: StoreIcon, permission: 'view_branches' },
