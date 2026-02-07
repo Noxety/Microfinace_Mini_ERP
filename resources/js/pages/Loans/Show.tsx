@@ -7,6 +7,7 @@ import { Head, router } from '@inertiajs/react';
 import DisburseLoanDialog from './components/DisburseLoanDialog';
 import PayInstallmentDialog from './components/PayInstallmentDialog';
 import { BreadcrumbItem } from '@/types';
+import { usePermission } from '@/hooks/usePermission';
 
 export default function LoanShow({ loan }) {
     const statusColor =
@@ -17,7 +18,6 @@ export default function LoanShow({ loan }) {
             closed: 'outline',
         }[loan.status] ?? 'secondary';
 
-    console.log(loan);
     const breadcrumbs: BreadcrumbItem[] = [
         {
             title: 'Loans',
@@ -28,6 +28,7 @@ export default function LoanShow({ loan }) {
             href: '/loans ' + loan.id,
         },
     ];
+    const { hasPermission } = usePermission();
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Loans Detail" />
@@ -55,12 +56,17 @@ export default function LoanShow({ loan }) {
                         </Button>
 
                         {loan.status === 'pending' && (
-                            <Button
-                                size="sm"
-                                onClick={() => router.get(route('loans.approve', loan.id))}
-                            >
-                                Approve loan
-                            </Button>
+                            <>
+                                {hasPermission('approve_loans') && (
+                                    <Button
+                                        size="sm"
+                                        onClick={() => router.get(route('loans.approve', loan.id))}
+                                    >
+                                        Approve loan
+                                    </Button>
+                                )}
+                            </>
+
                         )}
 
                         {loan.status === 'approved' && (

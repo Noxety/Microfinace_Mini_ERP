@@ -101,9 +101,14 @@ export default function LoanIndex({ loans }: { loans: { data: Loan[] } }) {
                                                     </Button>
                                                 )}
                                                 {hasPermission('update_loans') && loan.status === 'pending' && (
-                                                    <Button size="sm" asChild>
-                                                        <Link href={route('loans.approve', loan.id)}>Approve</Link>
-                                                    </Button>
+                                                    <>
+                                                        {hasPermission('approve_loans') && (
+                                                            <Button size="sm" asChild>
+                                                                <Link href={route('loans.approve', loan.id)}>Approve</Link>
+                                                            </Button>
+                                                        )}
+                                                    </>
+
                                                 )}
                                             </TableCell>
                                         </TableRow>
