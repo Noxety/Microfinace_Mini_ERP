@@ -23,16 +23,10 @@ jobs:
     - name: Install PHP dependencies
       run: composer install 
     
-    - name: Install Chrome binaries
-      run: php artisan dusk:chrome-driver --detect
-
-    - name: Start Chrome Driver
-      run: ./vendor/laravel/dusk/bin/chromedriver-win &
-
     - name: Install Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: 20
+        node-version: 23
 
     - name: Install NPM dependencies
       run: npm ci
