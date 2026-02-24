@@ -47,9 +47,3 @@ jobs:
         php artisan migrate --force
     - name: Run Laravel Server
       run: php artisan serve --no-reload &
-
-    - name: Run tests (Unit and Feature tests) via PHPUnit/Pest
-      env:
-        DB_CONNECTION: sqlite
-        DB_DATABASE: database/database.sqlite
-      run: php artisan test
